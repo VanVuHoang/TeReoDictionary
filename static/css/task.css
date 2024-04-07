@@ -1,0 +1,48 @@
+/* Body css */
+body{
+    background-image: url('../img/lighthouse.jpg');
+    background-size: cover;
+}
+
+.container {
+    width: 60vw;
+    margin: auto;
+}
+
+/* Navbar css */
+#beach{
+    background-image: url('../img/beach.jpg');
+}
+
+a.nav-link:not(:hover) {color: white;}
+a.nav-link:hover {color: cyan;}
+
+/* Form css */
+.submit_form {
+    text-align: center;
+    padding: 3%;
+    border-radius: 25px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4),
+    0 6px 20px 0 rgba(0, 0, 0, 0.36);
+}
+
+.myform {
+    margin: auto;
+    padding-bottom: 1rem;
+    margin-bottom: 20px;
+}
+
+.form-set {
+    padding-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.form-label {
+    width: 50%;
+    float: left;
+}
+
+.form-element {
+    width: 50%;
+    float: left;
+}
