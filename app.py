@@ -57,11 +57,15 @@ def logged():
         log=f"Logged in as {session.get('user_category')} ({session.get('user_fname')} {session.get('user_lname')})"
     return log
 
+def status(category):
+    if session.get('user_category') == category:
+        return True
+
 
 # App routes
 @app.route('/')
 def render_homepage():
-    return render_template('home.html', logged_in=is_logged_in(), log=logged())
+    return render_template('home.html', logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
 
 # Account
@@ -89,7 +93,7 @@ def render_signup():
         session['user_lname']=user_lname
         session['user_category']=user_category
         return redirect("/")
-    return render_template('signup.html', logged_in=is_logged_in(), log=logged())
+    return render_template('signup.html', logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -115,7 +119,7 @@ def render_login():
         session['user_lname']=user_lname
         session['user_category']=user_category
         return redirect("/")
-    return render_template('login.html', logged_in=is_logged_in(), log=logged())
+    return render_template('login.html', logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
 
 @app.route('/logout')
@@ -131,7 +135,7 @@ def render_delete_category():
         return redirect("/")
     else:
         naming=session['user_fname'] + " " + session['user_lname']
-        return render_template("delete.html", type="account", name=naming, logged_in=is_logged_in(), log=logged())
+        return render_template("delete.html", type="account", name=naming, logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
 
 @app.route('/delete_account')
