@@ -61,7 +61,35 @@ def logged():
 # App routes
 @app.route('/')
 def render_homepage():
-    return render_template('todo.html', logged_in=is_logged_in(), log=logged())
+    return render_template('home.html', logged_in=is_logged_in(), log=logged())
+
+
+# Account
+@app.route('/signup', methods=['POST', 'GET'])
+def render_signup():
+    if is_logged_in():
+        return redirect("/")
+    if request.method == "POST":
+        user_fname=request.form.get('user_fname').title().strip()
+        user_lname=request.form.get('user_lname').title().strip()
+        email=request.form.get('email').lower().strip()
+        password=request.form.get('password')
+        password2=request.form.get('password2')
+        user_category=request.form.get('category')
+        if password != password2:
+            return redirect("/signup?error=Passwords+do+not+match")
+        if len(password) < 8:
+            return redirect("/signup?error=Password+must+be+at+least+8+characters")
+        hashed_password=bcrypt.generate_password_hash(password).decode('utf-8')
+        id_count=int(fetch(DATABASE, f'SELECT COUNT (*) FROM users')[0]) + 1
+        fetch(DATABASE, f'INSERT INTO users (user_id, user_fname, user_lname, user_email, user_pass, user_category) VALUES ({id_count}, "{user_fname}", "{user_lname}", "{email}", "{hashed_password}", "{user_category}")')
+        session['email']=email
+        session['id']=id_count
+        session['user_fname']=user_fname
+        session['user_lname']=user_lname
+        session['user_category']=user_category
+        return redirect("/")
+    return render_template('signup.html', logged_in=is_logged_in(), log=logged())
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -90,37 +118,20 @@ def render_login():
     return render_template('login.html', logged_in=is_logged_in(), log=logged())
 
 
-@app.route('/signup', methods=['POST', 'GET'])
-def render_signup():
-    if is_logged_in():
-        return redirect("/")
-    if request.method == "POST":
-        user_fname=request.form.get('user_fname').title().strip()
-        user_lname=request.form.get('user_lname').title().strip()
-        email=request.form.get('email').lower().strip()
-        password=request.form.get('password')
-        password2=request.form.get('password2')
-        user_category=request.form.get('category')
-        if password != password2:
-            return redirect("/signup?error=Passwords+do+not+match")
-        if len(password) < 8:
-            return redirect("/signup?error=Password+must+be+at+least+8+characters")
-        hashed_password=bcrypt.generate_password_hash(password).decode('utf-8')
-        id_count=int(fetch(DATABASE, f'SELECT COUNT (*) FROM users')[0]) + 1
-        fetch(DATABASE, f'INSERT INTO users (user_id, user_fname, user_lname, user_email, user_pass, user_category) VALUES ({id_count}, "{user_fname}", "{user_lname}", "{email}", "{hashed_password}", "{user_category}")')
-        session['email']=email
-        session['id']=id_count
-        session['user_fname']=user_fname
-        session['user_lname']=user_lname
-        session['user_category']=user_category
-        return redirect("/")
-    return render_template('signup.html', logged_in=is_logged_in(), log=logged())
-
-
 @app.route('/logout')
 def logout():
     [session.pop(key) for key in list(session.keys())]
     return redirect('/?message=See+you+next+time!')
+
+
+# Deletion
+@app.route('/delete')
+def render_delete_category():
+    if not is_logged_in():
+        return redirect("/")
+    else:
+        naming=session['user_fname'] + " " + session['user_lname']
+        return render_template("delete.html", type="account", name=naming, logged_in=is_logged_in(), log=logged())
 
 
 @app.route('/delete_account')
@@ -129,5 +140,3 @@ def delete_account():
     [session.pop(key) for key in list(session.keys())]
     return redirect('/?message=Account+is+successfully+deleted!')
 
-
-app.run(host='0.0.0.0', debug=True)
