@@ -54,12 +54,21 @@ def is_logged_in():
 def logged():
     log="Not logged in"
     if is_logged_in():
-        log=f"Logged in as {session.get('user_category')} ({session.get('user_fname')} {session.get('user_lname')})"
+        log=f"Logged in as {session.get('user_category')} ({session.get('user_username')})"
     return log
 
 def status(category):
     if session.get('user_category') == category:
         return True
+    
+def credentials(email):
+    db_password=fetch(DATABASE, f'SELECT user_pass FROM users WHERE user_email="{email}"')[0]
+    user_id=fetch(DATABASE, f'SELECT user_id FROM users WHERE user_email="{email}"')[0]
+    user_fname=fetch(DATABASE, f'SELECT user_fname FROM users WHERE user_email="{email}"')[0]
+    user_lname=fetch(DATABASE, f'SELECT user_lname FROM users WHERE user_email="{email}"')[0]
+    user_username=fetch(DATABASE, f'SELECT user_username FROM users WHERE user_email="{email}"')[0]
+    user_category=fetch(DATABASE, f'SELECT user_category FROM users WHERE user_email="{email}"')[0]
+    return [db_password, user_id, user_fname, user_lname, user_username, user_category]
 
 
 # App routes
@@ -68,7 +77,7 @@ def render_homepage():
     return render_template('home.html', logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
 
-# Account
+# Signup & Login
 @app.route('/signup', methods=['POST', 'GET'])
 def render_signup():
     if is_logged_in():
@@ -76,6 +85,7 @@ def render_signup():
     if request.method == "POST":
         user_fname=request.form.get('user_fname').title().strip()
         user_lname=request.form.get('user_lname').title().strip()
+        user_username=request.form.get('user_username').strip()
         email=request.form.get('email').lower().strip()
         password=request.form.get('password')
         password2=request.form.get('password2')
@@ -86,11 +96,12 @@ def render_signup():
             return redirect("/signup?error=Password+must+be+at+least+8+characters")
         hashed_password=bcrypt.generate_password_hash(password).decode('utf-8')
         id_count=int(fetch(DATABASE, f'SELECT COUNT (*) FROM users')[0]) + 1
-        fetch(DATABASE, f'INSERT INTO users (user_id, user_fname, user_lname, user_email, user_pass, user_category) VALUES ({id_count}, "{user_fname}", "{user_lname}", "{email}", "{hashed_password}", "{user_category}")')
+        execute(DATABASE, f'INSERT INTO users (user_id, user_fname, user_lname, user_username, user_email, user_pass, user_category) VALUES ({id_count}, "{user_fname}", "{user_lname}", "{user_username}", "{email}", "{hashed_password}", "{user_category}")')
         session['email']=email
         session['id']=id_count
         session['user_fname']=user_fname
         session['user_lname']=user_lname
+        session['user_username']=user_username
         session['user_category']=user_category
         return redirect("/")
     return render_template('signup.html', logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
@@ -104,20 +115,17 @@ def render_login():
         email=request.form['email'].strip().lower()
         password=request.form['password'].strip()
         try:
-            user_id=fetch(DATABASE, f'SELECT user_id FROM users WHERE user_email="{email}"')[0]
-            user_fname=fetch(DATABASE, f'SELECT user_fname FROM users WHERE user_email="{email}"')[0]
-            user_lname=fetch(DATABASE, f'SELECT user_lname FROM users WHERE user_email="{email}"')[0]
-            db_password=fetch(DATABASE, f'SELECT user_pass FROM users WHERE user_email="{email}"')[0]
-            user_category=fetch(DATABASE, f'SELECT user_category FROM users WHERE user_email="{email}"')[0]
+            credentials(email)
         except IndexError:
             return redirect("/login?error=Invalid+username+or+password")
-        if not bcrypt.check_password_hash(db_password, password):
+        if not bcrypt.check_password_hash(credentials[0], password):
             return redirect(request.referrer + "?error=Email+valid+or+password+incorrect")
         session['email']=email
-        session['id']=user_id
-        session['user_fname']=user_fname
-        session['user_lname']=user_lname
-        session['user_category']=user_category
+        session['id']=credentials[1]
+        session['user_fname']=credentials[2]
+        session['user_lname']=credentials[3]
+        session['user_username']=credentials[4]
+        session['user_category']=credentials[5]
         return redirect("/")
     return render_template('login.html', logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
@@ -134,7 +142,7 @@ def render_delete_category():
     if not is_logged_in():
         return redirect("/")
     else:
-        naming=session['user_fname'] + " " + session['user_lname']
+        naming=session['user_username']
         return render_template("delete.html", type="account", name=naming, logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
 
@@ -143,4 +151,38 @@ def delete_account():
     execute(DATABASE, f"DELETE FROM users WHERE user_id={session.get('id')}")
     [session.pop(key) for key in list(session.keys())]
     return redirect('/?message=Account+is+successfully+deleted!')
+
+
+# Edit
+@app.route('/edit', methods=['POST', 'GET'])
+def render_edit():
+    if not is_logged_in():
+        return redirect("/")
+    if request.method == "POST":
+        user_fname=request.form.get('user_fname').title().strip()
+        user_lname=request.form.get('user_lname').title().strip()
+        user_username=request.form.get('user_username').strip()
+        email=request.form.get('email').lower().strip()
+        password=request.form.get('password')
+        password2=request.form.get('password2')
+        user_category=request.form.get('category')
+        if password != password2:
+            return redirect("/edit?error=Passwords+do+not+match")
+        if len(password) < 8:
+            return redirect("/edit?error=Password+must+be+at+least+8+characters")
+        hashed_password=bcrypt.generate_password_hash(password).decode('utf-8')
+        id = credentials(session.get('email'))[1]
+        execute(DATABASE, f'UPDATE users SET user_email = "{email}" WHERE user_id = {id}')
+        execute(DATABASE, f'UPDATE users SET user_pass = "{hashed_password}" WHERE user_id = {id}')
+        execute(DATABASE, f'UPDATE users SET user_fname = "{user_fname}" WHERE user_id = {id}')
+        execute(DATABASE, f'UPDATE users SET user_lname = "{user_lname}" WHERE user_id = {id}')
+        execute(DATABASE, f'UPDATE users SET user_username = "{user_username}" WHERE user_id = {id}')
+        execute(DATABASE, f'UPDATE users SET user_category = "{user_category}" WHERE user_id = {id}')
+        session['email']=email
+        session['user_fname']=user_fname
+        session['user_lname']=user_lname
+        session['user_username']=user_username
+        session['user_category']=user_category
+        return redirect("/")
+    return render_template('edit.html', logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
