@@ -27,17 +27,19 @@
             <ul class="navbar-nav mr-auto">
                 <li><a class="nav-link" href="/">Home</a></li>
                 {% if logged_in %}
-                <li><a class="nav-link" href="/logout">Logout</a></li>
-                <li><a class="nav-link" href="/delete">Delete Account</a></li>
-                <li><a class="nav-link" href="/edit">Edit Account</a></li>
                 {% if teacher %}
                 <li><a class="nav-link" href="/admin">Admin</a></li>
                 {% endif %}
+                <button class="accbtn" id="acc">Account</button>
+                <li><a class="nav-link" href="/logout" id="account">Logout</a></li>
+                <li><a class="nav-link" href="/delete" id="account">Delete Account</a></li>
+                <li><a class="nav-link" href="/edit" id="account">Edit Account</a></li>
                 {% else %}
-                <li><a class="nav-link" href="/login">Login</a></li>
+                <button class="accbtn" id="acc">Account</button>
+                <li><a class="nav-link" href="/login" id="account">Login</a></li>
                 {% endif %}
             </ul>
-            
+
             <!--Search-->
             <form class="form-inline my-2 my-md-0">
                 <input class="form-control" type="text" placeholder="Search" aria-label="Search">
@@ -46,6 +48,7 @@
     </nav>
     <br>
     {% block content %}{% endblock %}
+    <script src="static/js/task.js"></script>
 </body>
 
 </html>

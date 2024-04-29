@@ -14,8 +14,8 @@ body{
     background-image: url('../img/beach.jpg');
 }
 
-a.nav-link:not(:hover) {color: white;}
-a.nav-link:hover {color: cyan;}
+.nav-link:not(:hover) {color: white;}
+.nav-link:hover {color: cyan;}
 
 /* Form css */
 .submit_form {
@@ -46,3 +46,13 @@ a.nav-link:hover {color: cyan;}
     width: 50%;
     float: left;
 }
+
+/* Account button css */
+.accbtn {
+    border: none;
+    outline: none;
+    background: inherit;
+    font-family: inherit;
+}
+.accbtn:not(:hover) {color: white;}
+.accbtn:hover {color: cyan;}

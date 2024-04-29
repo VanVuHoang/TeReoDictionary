@@ -6,6 +6,6 @@ Confirm Delete
 
 {% block content %}
 <h3>Are you sure you want to delete {{ type }} ({{ name }})? 
-    <a href="/delete_account">Yes</a> / <a href="/">No</a>
+    <a href="/delete_{{ type }}/{{ id }}">Yes</a> / <a href="/">No</a>
 </h3>
 {% endblock %}

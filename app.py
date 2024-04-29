@@ -21,10 +21,11 @@ def create_connection(db_file):
 def execute(db_file, query):
     con=create_connection(db_file)
     cur=con.cursor()
-    executed=cur.execute(query)
+    cur.execute(query)
+    fetched=cur.fetchall()
     con.commit()
     con.close()
-    return executed
+    return fetched
 
 def fetch(db_file, query):
     con=create_connection(db_file)
@@ -118,14 +119,14 @@ def render_login():
             credentials(email)
         except IndexError:
             return redirect("/login?error=Invalid+username+or+password")
-        if not bcrypt.check_password_hash(credentials[0], password):
+        if not bcrypt.check_password_hash(credentials(email)[0], password):
             return redirect(request.referrer + "?error=Email+valid+or+password+incorrect")
         session['email']=email
-        session['id']=credentials[1]
-        session['user_fname']=credentials[2]
-        session['user_lname']=credentials[3]
-        session['user_username']=credentials[4]
-        session['user_category']=credentials[5]
+        session['id']=credentials(email)[1]
+        session['user_fname']=credentials(email)[2]
+        session['user_lname']=credentials(email)[3]
+        session['user_username']=credentials(email)[4]
+        session['user_category']=credentials(email)[5]
         return redirect("/")
     return render_template('login.html', logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
@@ -142,13 +143,14 @@ def render_delete_category():
     if not is_logged_in():
         return redirect("/")
     else:
+        id=session['id']
         naming=session['user_username']
-        return render_template("delete.html", type="account", name=naming, logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
+        return render_template("delete.html", type="account", id=id, name=naming, logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
 
-@app.route('/delete_account')
-def delete_account():
-    execute(DATABASE, f"DELETE FROM users WHERE user_id={session.get('id')}")
+@app.route('/delete_account/<id>')
+def delete_account(id):
+    execute(DATABASE, f"DELETE FROM users WHERE user_id={id}")
     [session.pop(key) for key in list(session.keys())]
     return redirect('/?message=Account+is+successfully+deleted!')
 
@@ -186,3 +188,80 @@ def render_edit():
         return redirect("/")
     return render_template('edit.html', logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
+
+# Add words as teacher
+@app.route('/admin')
+def render_admin():
+    if not is_logged_in():
+        return redirect('/?message=Need+to+be+logged+in.')
+    type_list=execute(DATABASE, f'SELECT type_id, type_name FROM types')
+    word_list=execute(DATABASE, f'SELECT word_id, word_name FROM words')
+    return render_template("admin.html", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"), types=type_list, words=word_list)
+
+
+@app.route('/add_type', methods=['POST'])
+def add_type():
+    if not is_logged_in():
+        return redirect('/?message=Need+to+be+logged+in.')
+    if request.method == "POST":
+        type_name=request.form.get('type_name').lower().strip()
+        id_count=int(fetch(DATABASE, f'SELECT COUNT (*) FROM types')[0]) + 1
+        execute(DATABASE, f'INSERT INTO type(type_id, type_name) VALUES ({id_count}, "{type_name}")')
+        return redirect("/admin")
+    return render_template("admin.html", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
+
+
+@app.route('/delete_type', methods=['POST'])
+def delete_type():
+    if not is_logged_in():
+        return redirect('/?message=Need+to+be+logged+in.')
+    if request.method == "POST":
+        type=request.form.get('word_type')
+        type=type.split(", ")
+        type_id=type[0]
+        type_name=type[1]
+        return render_template("delete.html", id=type_id, name=type_name, type="wordtype", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
+    return redirect("/admin")
+
+
+@app.route('/delete_wordtype/<id>')
+def delete_wordtype(id):
+    if not is_logged_in():
+        return redirect('/?message=Need+to+be+logged+in.')
+    execute(DATABASE, f'DELETE FROM types WHERE type_id={id}')
+    return redirect("/admin")
+
+
+@app.route('/add_word', methods=['POST'])
+def add_word():
+    if not is_logged_in():
+        return redirect('/?message=Need+to+be+logged+in.')
+    if request.method == "POST":
+        word_name=request.form.get('word_name').lower().strip()
+        word_translation=request.form.get('word_translation').lower().strip()
+        word_type=request.form.get('word_type').split(", ")[0]
+        word_definition=request.form.get('word_definition').lower().strip()
+        word_level=request.form.get('word_level').lower().strip()
+        id_count=int(fetch(DATABASE, f'SELECT COUNT (*) FROM words')[0]) + 1
+        execute(DATABASE, f'INSERT INTO words (word_id, word_name, word_translation, word_type, word_definition, word_level) VALUES ({id_count}, "{word_name}", "{word_translation}", "{word_type}", "{word_definition}", "{word_level}")')
+        return redirect("/admin")
+    return render_template("admin.html", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
+
+
+@app.route('/delete_word', methods=['POST'])
+def delete_word():
+    if not is_logged_in():
+        return redirect('/?message=Need+to+be+logged+in.')
+    if request.method == "POST":
+        word_name=request.form.get('word_name').split(", ")[1]
+        word_id=fetch(DATABASE, f'SELECT word_id FROM words WHERE word_name="{word_name}"')[0]
+        return render_template("delete.html", id=word_id, name=word_name, type="word", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
+    return redirect("/admin")
+
+
+@app.route('/delete_word/<id>')
+def delete_theword(id):
+    if not is_logged_in():
+        return redirect('/?message=Need+to+be+logged+in.')
+    execute(DATABASE, f'DELETE FROM words WHERE word_id={id}')
+    return redirect("/admin")
