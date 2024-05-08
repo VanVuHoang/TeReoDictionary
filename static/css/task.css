@@ -9,6 +9,7 @@ body{
     margin: auto;
 }
 
+
 /* Navbar css */
 #beach{
     background-image: url('../img/beach.jpg');
@@ -16,6 +17,7 @@ body{
 
 .nav-link:not(:hover) {color: white;}
 .nav-link:hover {color: cyan;}
+
 
 /* Form css */
 .submit_form {
@@ -47,12 +49,62 @@ body{
     float: left;
 }
 
+
 /* Account button css */
 .accbtn {
     border: none;
     outline: none;
     background: inherit;
     font-family: inherit;
+    border-left: 1px solid blue;
+    border-right: 1px solid blue;
 }
-.accbtn:not(:hover) {color: white;}
-.accbtn:hover {color: cyan;}
+
+
+/* Display words */
+.words li{
+    display: inline;
+}
+
+.words {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+
+.word-box {
+    width: 32%;
+    border: 1px solid rgba(189, 195, 199, 1.0);
+    color: rgba(44, 62, 80, 1.0);
+    margin-bottom: 0.5rem;
+}
+
+.word-box-heading {
+    padding: 0.5rem;
+}
+
+.word-box-image {
+    height: 150px;
+    overflow: hidden;
+}
+
+.word-box-info {
+    padding: 0.5rem;
+
+}
+
+.word-box h3 {
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.word-box p {
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+}
+
+.word-box a {
+    border: 1px solid tomato;
+    padding: 0.3rem;
+    text-align: right;
+}
