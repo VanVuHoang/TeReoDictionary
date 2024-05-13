@@ -28,25 +28,22 @@
                 <li><a class="nav-link accbtn" href="/">Home</a></li>
                 {% if logged_in %}
                 {% if teacher %}
-                <!--<li><a class="nav-link" href="/admin">Admin</a></li>-->
                 <button class="nav-link accbtn" id="adm">Admin</button>
-                <li><a class="nav-link" href="/logout" id="admin">Logout</a></li>
-                <li><a class="nav-link" href="/delete" id="admin">Delete Account</a></li>
-                <li><a class="nav-link" href="/edit" id="admin">Edit Account</a></li>
+                <li><a class="nav-link" href="/add_word" id="admin">Add Word</a></li>
+                <li><a class="nav-link" href="/delete_word" id="admin">Delete Word</a></li>
                 {% endif %}
                 <button class="nav-link accbtn" id="acc">Account</button>
-                <li><a class="nav-link" href="/logout" id="account">Logout</a></li>
+                <li><a class="nav-link" href="/logout_account" id="account">Logout</a></li>
                 <li><a class="nav-link" href="/delete" id="account">Delete Account</a></li>
-                <li><a class="nav-link" href="/edit" id="account">Edit Account</a></li>
+                <li><a class="nav-link" href="/edit_account" id="account">Edit Account</a></li>
                 {% else %}
-                <button class="accbtn" id="acc">Account</button>
-                <li><a class="nav-link" href="/login" id="account">Login</a></li>
+                <button class="nav-link accbtn" id="acc">Account</button>
+                <li><a class="nav-link" href="/login_account" id="account">Login</a></li>
                 {% endif %}
             </ul>
 
-            <!--
-            <form class="form-inline my-2 my-md-0">
-                <input class="form-control" type="text" placeholder="Search" aria-label="Search">
+            <!--<form class="form-inline my-2 my-md-0" action="/">
+                <input class="form-control" id="query" name="query" type="text" placeholder="Search" aria-label="Search">
             </form>-->
         </div>
     </nav>

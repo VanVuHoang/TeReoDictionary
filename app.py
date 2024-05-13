@@ -77,7 +77,7 @@ def credentials(email):
 # Display words
 @app.route('/')
 def render_all():
-    word_tuple=execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, word_level, user_id FROM words INNER JOIN types ON words.word_type=types.type_id INNER JOIN records ON words.word_id=records.word_id')
+    word_tuple=execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, word_level, user_id, word_image, record_id FROM words INNER JOIN types ON words.word_type=types.type_id INNER JOIN records ON words.word_id=records.word_id')
     user_dict = {}
     user_tuple=execute(DATABASE, f'SELECT user_id, user_username FROM users')
     for user in user_tuple:
@@ -90,7 +90,7 @@ def render_all():
 def render_word(word_type):
     if word_type != "favicon.ico":
         type_id=fetch(DATABASE, f'SELECT type_id FROM types WHERE LOWER(type_name)="{word_type}"')[0]
-        word_tuple=execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, word_level, user_id FROM words INNER JOIN types ON words.word_type=types.type_id INNER JOIN records ON words.word_id=records.word_id WHERE words.word_type={type_id}')
+        word_tuple=execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, word_level, user_id, word_image, record_id FROM words INNER JOIN types ON words.word_type=types.type_id INNER JOIN records ON words.word_id=records.word_id WHERE words.word_type={type_id}')
         user_dict = {}
         user_tuple=execute(DATABASE, f'SELECT user_id, user_username FROM users')
         for user in user_tuple:
@@ -101,7 +101,7 @@ def render_word(word_type):
 
 
 # Signup & Login
-@app.route('/signup', methods=['POST', 'GET'])
+@app.route('/signup_account', methods=['POST', 'GET'])
 def render_signup():
     if is_logged_in():
         return redirect("/")
@@ -126,11 +126,11 @@ def render_signup():
         session['user_lname']=user_lname
         session['user_username']=user_username
         session['user_category']=user_category
-        return redirect("/")
+        return redirect("/?message=Signup+successful!")
     return render_template('account/signup.html', logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
 
-@app.route('/login', methods=['POST', 'GET'])
+@app.route('/login_account', methods=['POST', 'GET'])
 def render_login():
     if is_logged_in():
         return redirect("/")
@@ -139,27 +139,27 @@ def render_login():
         password=request.form['password'].strip()
         try:
             credentials(email)
-        except IndexError:
+        except TypeError:
             return redirect("/login?error=Invalid+username+or+password")
         if not bcrypt.check_password_hash(credentials(email)[0], password):
-            return redirect(request.referrer + "?error=Email+valid+or+password+incorrect")
+            return redirect(request.referrer + "?error=Email+invalid+or+password+incorrect")
         session['email']=email
         session['id']=credentials(email)[1]
         session['user_fname']=credentials(email)[2]
         session['user_lname']=credentials(email)[3]
         session['user_username']=credentials(email)[4]
         session['user_category']=credentials(email)[5]
-        return redirect("/")
+        return redirect("/?message=Login+successful!")
     return render_template('account/login.html', logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
 
-@app.route('/logout')
+@app.route('/logout_account')
 def logout():
     [session.pop(key) for key in list(session.keys())]
-    return redirect('/?message=See+you+next+time!')
+    return redirect('/?message=Logout+successful!')
 
 
-# Deletion
+# Delete account
 @app.route('/delete')
 def render_delete_category():
     if not is_logged_in():
@@ -177,8 +177,8 @@ def delete_account(id):
     return redirect('/?message=Account+is+successfully+deleted!')
 
 
-# Edit
-@app.route('/edit', methods=['POST', 'GET'])
+# Edit account
+@app.route('/edit_account', methods=['POST', 'GET'])
 def render_edit():
     if not is_logged_in():
         return redirect("/")
@@ -207,55 +207,24 @@ def render_edit():
         session['user_lname']=user_lname
         session['user_username']=user_username
         session['user_category']=user_category
-        return redirect("/")
-    return render_template('edit.html', logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
+        return redirect("/?message=Account+is+successfully+edited!")
+    return render_template('account/edit.html', logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
 
-# Add words as teacher
-@app.route('/admin')
-def render_admin():
+# Add word
+@app.route('/add_word')
+def render_addword():
     if not is_logged_in():
         return redirect('/?message=Need+to+be+logged+in.')
     type_tuple=execute(DATABASE, f'SELECT type_id, type_name FROM types')
     word_tuple=execute(DATABASE, f'SELECT word_id, word_name FROM words')
-    return render_template("admin.html", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"), types=type_tuple, words=word_tuple)
+    level_list=[]
+    for i in range(1, 11):
+        level_list.append(i)
+    return render_template("admin/add_word.html", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"), types=type_tuple, words=word_tuple, levels=level_list)
 
 
-@app.route('/add_type', methods=['POST'])
-def add_type():
-    if not is_logged_in():
-        return redirect('/?message=Need+to+be+logged+in.')
-    if request.method == "POST":
-        type_name=request.form.get('type_name').lower().strip()
-        id_count=int(fetch(DATABASE, f'SELECT COUNT (*) FROM types')[0]) + 1
-        execute(DATABASE, f'INSERT INTO type(type_id, type_name) VALUES ({id_count}, "{type_name}")')
-        return redirect("/admin")
-    return render_template("admin.html", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
-
-
-@app.route('/delete_type', methods=['POST'])
-def delete_type():
-    if not is_logged_in():
-        return redirect('/?message=Need+to+be+logged+in.')
-    if request.method == "POST":
-        type=request.form.get('word_type')
-        type=type.split(", ")
-        type_id=type[0]
-        type_name=type[1]
-        return render_template("delete.html", id=type_id, name=type_name, type="wordtype", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
-    return redirect("/admin")
-
-
-@app.route('/delete_wordtype/<id>')
-def delete_wordtype(id):
-    if not is_logged_in():
-        return redirect('/?message=Need+to+be+logged+in.')
-    execute(DATABASE, f'DELETE FROM types WHERE type_id={id}')
-    execute(DATABASE, f'DELETE FROM records WHERE record_id={id}')
-    return redirect("/admin")
-
-
-@app.route('/add_word', methods=['POST'])
+@app.route('/addword', methods=['POST'])
 def add_word():
     if not is_logged_in():
         return redirect('/?message=Need+to+be+logged+in.')
@@ -266,32 +235,45 @@ def add_word():
         word_definition=request.form.get('word_definition').lower().strip()
         word_level=request.form.get('word_level').lower().strip()
         id_count=int(fetch(DATABASE, f'SELECT COUNT (*) FROM words')[0]) + 1
-        execute(DATABASE, f'INSERT INTO words (word_id, word_name, word_translation, word_type, word_definition, word_level) VALUES ({id_count}, "{word_name}", "{word_translation}", "{word_type}", "{word_definition}", "{word_level}")')
-        return redirect(f"/add_record/{id_count}")
-    return render_template("admin.html", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
+        execute(DATABASE, f'INSERT INTO words (word_id, word_name, word_translation, word_type, word_definition, word_level, word_image) VALUES ({id_count}, "{word_name}", "{word_translation}", "{word_type}", "{word_definition}", "{word_level}", "noimage.png")')
+        return redirect(f"/addrecord/{id_count}")
+    return render_template("admin/add_word.html", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
-@app.route('/add_record/<word_id>')
+
+@app.route('/addrecord/<word_id>')
 def add_record(word_id):
     if not is_logged_in():
         return redirect('/?message=Need+to+be+logged+in.')
     id_count=int(fetch(DATABASE, f'SELECT COUNT (*) FROM records')[0]) + 1
     execute(DATABASE, f'INSERT INTO records (record_id, word_id, user_id) VALUES ({id_count}, {word_id}, {session["id"]})')
-    return redirect("/admin")
+    return redirect("/?message=Word+is+successfully+added!")
 
-@app.route('/delete_word', methods=['POST'])
+
+# Delete word
+@app.route('/delete_word')
+def render_deleteword():
+    if not is_logged_in():
+        return redirect('/?message=Need+to+be+logged+in.')
+    type_tuple=execute(DATABASE, f'SELECT type_id, type_name FROM types')
+    word_tuple=execute(DATABASE, f'SELECT record_id, word_name FROM words INNER JOIN records ON words.word_id=records.word_id')
+    return render_template("admin/delete_word.html", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"), types=type_tuple, words=word_tuple)
+
+
+@app.route('/deleteword', methods=['POST'])
 def delete_word():
     if not is_logged_in():
         return redirect('/?message=Need+to+be+logged+in.')
     if request.method == "POST":
-        word_name=request.form.get('word_name').split(", ")[1]
-        word_id=fetch(DATABASE, f'SELECT word_id FROM words WHERE word_name="{word_name}"')[0]
-        return render_template("delete.html", id=word_id, name=word_name, type="word", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
-    return redirect("/admin")
+        record_id=request.form.get('record_id').strip()
+        return redirect(f"/deleterecord/{record_id}")
+    return render_template("admin/delete_word.html", id=record_id, logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
 
-@app.route('/delete_word/<id>')
-def delete_theword(id):
+@app.route('/deleterecord/<record_id>')
+def delete_record(record_id):
     if not is_logged_in():
         return redirect('/?message=Need+to+be+logged+in.')
-    execute(DATABASE, f'DELETE FROM words WHERE word_id={id}')
-    return redirect("/admin")
+    word_id=fetch(DATABASE, f'SELECT words.word_id FROM words INNER JOIN records ON words.word_id=records.word_id WHERE record_id={record_id}')[0]
+    execute(DATABASE, f'DELETE FROM words WHERE word_id={word_id}')
+    execute(DATABASE, f'DELETE FROM records WHERE record_id={record_id}')
+    return redirect("/?message=Word+is+successfully+deleted!")

@@ -5,9 +5,9 @@ Signup
 {% endblock %}
 
 {% block content %}
-<div class="row submit_form">
-    <div class="col-lg-4"></div>
-    <div class="col-lg-4">
+<div class="form-border">
+    <center>
+        <h4>Signup</h4>
         <form class="myform" method="POST">
             <div class="form-set">
                 <div class="form-label">First name:</div>
@@ -47,14 +47,14 @@ Signup
                 <div class="form-label">Are you a:</div>
                 <div style="padding-top: 1.5%">
                     <div class="form-check-inline">
-                      <label class="form-check-label">
+                        <label class="form-check-label">
                         <input type="radio" class="form-check-input" name="category" id="category" value="Student" checked>Student
-                      </label>
+                        </label>
                     </div>
                     <div class="form-check-inline">
-                      <label class="form-check-label">
+                        <label class="form-check-label">
                         <input type="radio" class="form-check-input" name="category" id="category" value="Teacher">Teacher
-                      </label>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -64,6 +64,6 @@ Signup
                 <button type="submit" value="Signup" class="btn btn-primary">Signup</button>
             </div>
         </form>
-    </div>
+    </center>
 </div>
 {% endblock %}

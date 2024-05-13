@@ -9,7 +9,6 @@ body{
     margin: auto;
 }
 
-
 /* Navbar css */
 #beach{
     background-image: url('../img/beach.jpg');
@@ -20,9 +19,11 @@ body{
 
 
 /* Form css */
-.submit_form {
+.form-border {
     text-align: center;
     padding: 3%;
+    margin-left: 30%;
+    margin-right: 30%;
     border-radius: 25px;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4),
     0 6px 20px 0 rgba(0, 0, 0, 0.36);
@@ -90,7 +91,6 @@ body{
 
 .word-box-info {
     padding: 0.5rem;
-
 }
 
 .word-box h3 {
@@ -101,6 +101,7 @@ body{
 .word-box p {
     font-size: 0.8rem;
     margin-bottom: 0.3rem;
+    color: tomato;
 }
 
 .word-box a {
