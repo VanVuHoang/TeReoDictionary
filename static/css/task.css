@@ -14,9 +14,8 @@ body{
     background-image: url('../backgrounds/beach.jpg');
 }
 
-.nav-link:not(:hover) {color: white;}
-.nav-link:hover {color: cyan;}
-
+a:not(:hover) {color: white;}
+a:hover {color: cyan; text-decoration: none}
 
 /* Form css */
 .form-border {

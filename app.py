@@ -83,8 +83,8 @@ def render_all():
     for user in user_tuple:
         user_dict[user[0]] = user[1]
     type_tuple=execute(DATABASE, f'SELECT type_id, type_name FROM types')
+    alert=False
     return render_template('home.html', words=word_tuple, types=type_tuple, users=user_dict, logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
-
 
 @app.route('/<word_type>')
 def render_word(word_type):
