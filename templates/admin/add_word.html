@@ -47,6 +47,17 @@ Add word
             </div>
 
             <div class="form-set">
+                <div class="form-label">Image:</div>
+                <div class="form-element">
+                    <select id="word_image" name="word_image" required>
+                        {% for image in images %}
+                        <option value="{{ image[0] }}, {{ image[1] }}">{{ image[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-set">
             <div>
                 <div class="form-label" style="padding: 0.3rem"></div>
                 <button type="submit" value="Signup" class="btn btn-primary">Add</button>

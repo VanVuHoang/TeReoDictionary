@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, session
-import sqlite3
+import sqlite3, os
 from sqlite3 import Error
 from flask_bcrypt import Bcrypt
 
@@ -77,7 +77,7 @@ def credentials(email):
 # Display words
 @app.route('/')
 def render_all():
-    word_tuple=execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, word_level, user_id, word_image, record_id FROM words INNER JOIN types ON words.word_type=types.type_id INNER JOIN records ON words.word_id=records.word_id')
+    word_tuple=execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, word_level, user_id, image_name, record_id FROM words INNER JOIN types ON words.word_type=types.type_id INNER JOIN records ON words.word_id=records.word_id INNER JOIN images ON words.word_image=images.image_id')
     user_dict = {}
     user_tuple=execute(DATABASE, f'SELECT user_id, user_username FROM users')
     for user in user_tuple:
@@ -90,7 +90,7 @@ def render_all():
 def render_word(word_type):
     if word_type != "favicon.ico":
         type_id=fetch(DATABASE, f'SELECT type_id FROM types WHERE LOWER(type_name)="{word_type}"')[0]
-        word_tuple=execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, word_level, user_id, word_image, record_id FROM words INNER JOIN types ON words.word_type=types.type_id INNER JOIN records ON words.word_id=records.word_id WHERE words.word_type={type_id}')
+        word_tuple=execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, word_level, user_id, image_name, record_id FROM words INNER JOIN types ON words.word_type=types.type_id INNER JOIN records ON words.word_id=records.word_id INNER JOIN images ON words.word_image=images.image_id WHERE words.word_type={type_id}')
         user_dict = {}
         user_tuple=execute(DATABASE, f'SELECT user_id, user_username FROM users')
         for user in user_tuple:
@@ -114,9 +114,9 @@ def render_signup():
         password2=request.form.get('password2')
         user_category=request.form.get('category')
         if password != password2:
-            return redirect("/signup?error=Passwords+do+not+match")
+            return redirect("/signup_account?error=Passwords+do+not+match")
         if len(password) < 8:
-            return redirect("/signup?error=Password+must+be+at+least+8+characters")
+            return redirect("/signup_account?error=Password+must+be+at+least+8+characters")
         hashed_password=bcrypt.generate_password_hash(password).decode('utf-8')
         id_count=int(fetch(DATABASE, f'SELECT COUNT (*) FROM users')[0]) + 1
         execute(DATABASE, f'INSERT INTO users (user_id, user_fname, user_lname, user_username, user_email, user_pass, user_category) VALUES ({id_count}, "{user_fname}", "{user_lname}", "{user_username}", "{email}", "{hashed_password}", "{user_category}")')
@@ -135,12 +135,12 @@ def render_login():
     if is_logged_in():
         return redirect("/")
     if request.method == "POST":
-        email=request.form['email'].strip().lower()
+        email=request.form['email'].lower().strip()
         password=request.form['password'].strip()
         try:
             credentials(email)
         except TypeError:
-            return redirect("/login?error=Invalid+username+or+password")
+            return redirect("/login_account?error=Invalid+username+or+password")
         if not bcrypt.check_password_hash(credentials(email)[0], password):
             return redirect(request.referrer + "?error=Email+invalid+or+password+incorrect")
         session['email']=email
@@ -160,19 +160,9 @@ def logout():
 
 
 # Delete account
-@app.route('/delete')
-def render_delete_category():
-    if not is_logged_in():
-        return redirect("/")
-    else:
-        id=session['id']
-        naming=session['user_username']
-        return render_template("delete.html", type="account", id=id, name=naming, logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
-
-
-@app.route('/delete_account/<id>')
-def delete_account(id):
-    execute(DATABASE, f"DELETE FROM users WHERE user_id={id}")
+@app.route('/delete_account')
+def delete_account():
+    execute(DATABASE, f"DELETE FROM users WHERE user_id={session['id']}")
     [session.pop(key) for key in list(session.keys())]
     return redirect('/?message=Account+is+successfully+deleted!')
 
@@ -191,9 +181,9 @@ def render_edit():
         password2=request.form.get('password2')
         user_category=request.form.get('category')
         if password != password2:
-            return redirect("/edit?error=Passwords+do+not+match")
+            return redirect("/edit_account?error=Passwords+do+not+match")
         if len(password) < 8:
-            return redirect("/edit?error=Password+must+be+at+least+8+characters")
+            return redirect("/edit_account?error=Password+must+be+at+least+8+characters")
         hashed_password=bcrypt.generate_password_hash(password).decode('utf-8')
         id = credentials(session.get('email'))[1]
         execute(DATABASE, f'UPDATE users SET user_email = "{email}" WHERE user_id = {id}')
@@ -221,7 +211,8 @@ def render_addword():
     level_list=[]
     for i in range(1, 11):
         level_list.append(i)
-    return render_template("admin/add_word.html", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"), types=type_tuple, words=word_tuple, levels=level_list)
+    image_tuple=execute(DATABASE, f'SELECT image_id, image_name FROM images')
+    return render_template("admin/add_word.html", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"), types=type_tuple, words=word_tuple, levels=level_list, images=image_tuple)
 
 
 @app.route('/addword', methods=['POST'])
@@ -229,13 +220,14 @@ def add_word():
     if not is_logged_in():
         return redirect('/?message=Need+to+be+logged+in.')
     if request.method == "POST":
-        word_name=request.form.get('word_name').lower().strip()
-        word_translation=request.form.get('word_translation').lower().strip()
+        word_name=request.form.get('word_name').title().strip()
+        word_translation=request.form.get('word_translation').title().strip()
         word_type=request.form.get('word_type').split(", ")[0]
-        word_definition=request.form.get('word_definition').lower().strip()
-        word_level=request.form.get('word_level').lower().strip()
+        word_definition=request.form.get('word_definition').title().strip()
+        word_level=request.form.get('word_level').strip()
+        word_image=request.form.get('word_image').split(", ")[0]
         id_count=int(fetch(DATABASE, f'SELECT COUNT (*) FROM words')[0]) + 1
-        execute(DATABASE, f'INSERT INTO words (word_id, word_name, word_translation, word_type, word_definition, word_level, word_image) VALUES ({id_count}, "{word_name}", "{word_translation}", "{word_type}", "{word_definition}", "{word_level}", "noimage.png")')
+        execute(DATABASE, f'INSERT INTO words (word_id, word_name, word_translation, word_type, word_definition, word_level, word_image) VALUES ({id_count}, "{word_name}", "{word_translation}", "{word_type}", "{word_definition}", "{word_level}", "{word_image}")')
         return redirect(f"/addrecord/{id_count}")
     return render_template("admin/add_word.html", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
@@ -276,4 +268,9 @@ def delete_record(record_id):
     word_id=fetch(DATABASE, f'SELECT words.word_id FROM words INNER JOIN records ON words.word_id=records.word_id WHERE record_id={record_id}')[0]
     execute(DATABASE, f'DELETE FROM words WHERE word_id={word_id}')
     execute(DATABASE, f'DELETE FROM records WHERE record_id={record_id}')
+    index=int(fetch(DATABASE, f'SELECT COUNT (*) FROM words')[0]) + 1 - word_id
+    for i in range(0, index):
+        execute(DATABASE, f'UPDATE words SET word_id = "{word_id + i}" WHERE word_id = {word_id + i + 1}')
+        execute(DATABASE, f'UPDATE records SET record_id = "{word_id + i}" WHERE word_id = {word_id + i + 1}')
+        execute(DATABASE, f'UPDATE records SET word_id = "{word_id + i}" WHERE word_id = {word_id + i + 1}')
     return redirect("/?message=Word+is+successfully+deleted!")

@@ -29,16 +29,16 @@
                 {% if logged_in %}
                 {% if teacher %}
                 <button class="nav-link accbtn" id="adm">Admin</button>
-                <li><a class="nav-link" href="/add_word" id="admin">Add Word</a></li>
-                <li><a class="nav-link" href="/delete_word" id="admin">Delete Word</a></li>
+                <li><a class="nav-link admin" href="/add_word" onclick="document.getElementById('word_level').getElementsByTagName('option')[27].selected = 'selected';">Add Word</a></li>
+                <li><a class="nav-link admin" href="/delete_word">Delete Word</a></li>
                 {% endif %}
                 <button class="nav-link accbtn" id="acc">Account</button>
-                <li><a class="nav-link" href="/logout_account" id="account">Logout</a></li>
-                <li><a class="nav-link" href="/delete" id="account">Delete Account</a></li>
-                <li><a class="nav-link" href="/edit_account" id="account">Edit Account</a></li>
+                <li><a class="nav-link account" href="/logout_account">Logout</a></li>
+                <li><a class="nav-link account" href="/delete_account">Delete Account</a></li>
+                <li><a class="nav-link account" href="/edit_account">Edit Account</a></li>
                 {% else %}
                 <button class="nav-link accbtn" id="acc">Account</button>
-                <li><a class="nav-link" href="/login_account" id="account">Login</a></li>
+                <li><a class="nav-link account" href="/login_account">Login</a></li>
                 {% endif %}
             </ul>
 

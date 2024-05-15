@@ -25,7 +25,9 @@ Home
             <p><strong>Level:</strong> {{ word[4] }}</p>
             <p><strong>User:</strong> {{ users[word[5]] }}</p>
             <form action="/deleterecord/{{ word[7] }}">
+            {% if teacher %}
             <center><button type="submit" value="Delete" class="btn btn-primary">Delete</button></center>
+            {% endif %}
             </form>
         </div>
     </div>
