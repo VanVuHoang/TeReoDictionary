@@ -9,6 +9,7 @@ app=Flask(__name__)
 bcrypt=Bcrypt(app)
 app.secret_key="vuhoang"
 
+
 # Getting data from database
 def create_connection(db_file):
     try:
@@ -44,6 +45,7 @@ def search(db_file, query, input):
     list=cur.execute()
     con.close()
     return list
+
 
 # Logging status
 def is_logged_in():
@@ -252,7 +254,7 @@ def render_addword():
     image_tuple=execute(DATABASE, f'SELECT image_id, image_name FROM images WHERE image_id != 1')
     return render_template("admin/add_word.html", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"), types=type_tuple, words=word_tuple, images=image_tuple)
 
-@app.route('/addword', methods=['POST'])
+@app.route('/adding_word', methods=['POST'])
 def add_word():
     if not is_logged_in():
         return redirect('/?message=Need+to+be+logged+in.')
@@ -265,40 +267,17 @@ def add_word():
             word_image=request.form.get('word_image').split(", ")[0]
         else:
             word_image=1
-        id_count=int(fetch(DATABASE, f'SELECT COUNT (*) FROM words')[0]) + 1
-        execute(DATABASE, f'INSERT INTO words (word_id, word_name, word_translation, word_type, word_definition, word_image) VALUES ({id_count}, "{word_name}", "{word_translation}", "{word_type}", "{word_definition}", "{word_image}")')
-        return redirect(f"/addrecord/{id_count}")
+        word_id_count=int(fetch(DATABASE, f'SELECT COUNT (*) FROM words')[0]) + 1
+        execute(DATABASE, f'INSERT INTO words (word_id, word_name, word_translation, word_type, word_definition, word_image) VALUES ({word_id_count}, "{word_name}", "{word_translation}", "{word_type}", "{word_definition}", "{word_image}")')
+        record_id_count=int(fetch(DATABASE, f'SELECT COUNT (*) FROM records')[0]) + 1
+        execute(DATABASE, f'INSERT INTO records (record_id, word_id, user_id) VALUES ({record_id_count}, {word_id_count}, {session["id"]})')
+        return redirect("/?message=Word+is+successfully+added!")
     return render_template("admin/add_word.html", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
-@app.route('/addrecord/<word_id>')
-def add_record(word_id):
-    if not is_logged_in():
-        return redirect('/?message=Need+to+be+logged+in.')
-    id_count=int(fetch(DATABASE, f'SELECT COUNT (*) FROM records')[0]) + 1
-    execute(DATABASE, f'INSERT INTO records (record_id, word_id, user_id) VALUES ({id_count}, {word_id}, {session["id"]})')
-    return redirect("/?message=Word+is+successfully+added!")
 
-
-# Delete word
-@app.route('/delete_word')
-def render_deleteword():
-    if not is_logged_in():
-        return redirect('/?message=Need+to+be+logged+in.')
-    type_tuple=execute(DATABASE, f'SELECT type_id, type_name FROM types')
-    word_tuple=execute(DATABASE, f'SELECT record_id, word_name FROM words INNER JOIN records ON words.word_id=records.word_id')
-    return render_template("admin/delete_word.html", logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"), types=type_tuple, words=word_tuple)
-
-@app.route('/deleteword', methods=['POST'])
-def delete_word():
-    if not is_logged_in():
-        return redirect('/?message=Need+to+be+logged+in.')
-    if request.method == "POST":
-        record_id=request.form.get('record_id').strip()
-        return redirect(f"/deleterecord/{record_id}")
-    return render_template("admin/delete_word.html", id=record_id, logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
-
-@app.route('/deleterecord/<record_id>')
-def delete_record(record_id):
+## Delete word
+@app.route('/deleting_word/<record_id>')
+def deleting_word(record_id):
     if not is_logged_in():
         return redirect('/?message=Need+to+be+logged+in.')
     word_id=fetch(DATABASE, f'SELECT words.word_id FROM words INNER JOIN records ON words.word_id=records.word_id WHERE record_id={record_id}')[0]

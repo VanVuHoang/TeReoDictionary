@@ -9,6 +9,7 @@ body{
     margin: auto;
 }
 
+
 /* Navbar css */
 #beach{
     background-image: url('../backgrounds/beach.jpg');
@@ -16,6 +17,7 @@ body{
 
 a:not(:hover) {color: white;}
 a:hover {color: cyan; text-decoration: none}
+
 
 /* Form css */
 .form-border {

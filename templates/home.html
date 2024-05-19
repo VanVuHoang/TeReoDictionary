@@ -6,6 +6,7 @@ Home
 
 {% block content %}
 <div class="words">
+    <!--Display word type-->
     {% for type in types %}
     <ul>
         <li><a class="nav-link" href="/type={{ type[1].lower() }}">{{ type[1] }}</a></li>
@@ -17,19 +18,23 @@ Home
     {% for word in words %}
     <div class="word-box">
         <div class="word-box-info">
+            <!--Word info-->
             <div class="word-box-image"><center><img src="/static/images/{{ word[5] }}"></img></center></div>
             <p><strong>Word:</strong> {{ word[0] }}</p>
             <p><strong>Translation:</strong> {{ word[1] }}</p>
             <p><strong>Type:</strong> {{ word[2] }}</p>
             <p><strong>Definition:</strong> {{ word[3] }}</p>
             <p><strong>User:</strong> {{ users[word[4]] }}</p>
-            <form action="/deleterecord/{{ word[6] }}">
+
+            <!--Delete word-->
             {% if teacher %}
             <center>
-                <button type="submit" value="Delete" class="btn btn-primary" id="del">Delete</button>
+                <button type="submit" value="Delete" class="btn btn-primary" id="delete_word_confirm" onclick=alert({{ word[6] }})>Delete?</button>
+                <form action="/deleting_word/{{ word[6] }}">
+                    <button type="submit" value="Delete" class="btn btn-danger" id="delete_word" style="display: none">Delete</button>
+                </form>
             </center>
             {% endif %}
-            </form>
         </div>
     </div>
     {% endfor %}
