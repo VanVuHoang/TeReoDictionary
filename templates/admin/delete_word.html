@@ -12,7 +12,7 @@ Delete word
             <div class="form-set">
                 <div class="form-label"><label for="name">Word: </label></div>
                 <div class="form-element">
-                    <select id="record_id" name="record_id" required>
+                    <select name="record_id" required>
                         {% for word in words %}
                         <option value="{{ word[0] }}">{{ word[1] }}</option>
                         {% endfor %}

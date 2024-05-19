@@ -37,21 +37,21 @@
                 <li><a class="nav-link account" href="#delete_account?" onclick=alert("delete_account")>Delete Account</a></li>
                 <li><a class="nav-link account" href="/edit_account">Edit Account</a></li>
                 {% else %}
-                <button class="nav-link accbtn" id="acc">Account</button>
+                <button class="nav-link accbtn" id="acc"><a href="#">Account</a></button>
                 <li><a class="nav-link account" href="/login_account">Login</a></li>
                 {% endif %}
             </ul>
 
             <!--Account alert-->
             <span id="alert" style="padding: 0.5rem 1rem; color: white">Are you sure?</span>
-            <button class="nav-link accbtn" id="alert_logout"><a href="/logout">Yes</a></button>
+            <button class="nav-link accbtn" id="alert_logout"><a href="/logout_account">Yes</a></button>
             <button class="nav-link accbtn" id="alert_delete_account"><a href="/delete_account">Yes</a></button>
-            <button class="nav-link accbtn" id="alert" style="color: red" onclick=alert("")>No</button>
+            <button class="nav-link accbtn" id="alert" onclick=alert("")><a href="#">No</a></button>
 
-            <!--<form class="form-inline my-2 my-md-0" action="/">
-                <input class="form-control" id="query" name="query" type="text" placeholder="Search" aria-label="Search">
-            </form>-->
-
+            <!--Search-->
+            <form class="form-inline my-2 my-md-0" action="/search">
+                <input class="form-control" id="query" name="query" type="text" placeholder="Search word/translation" aria-label="Search">
+            </form>
         </div>
     </nav>
     <br>

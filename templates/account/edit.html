@@ -10,57 +10,68 @@ Signup
         <h4>Edit account</h4>
         <form class="myform" method="POST">
             <div class="form-set">
-                <div class="form-label">First name:</div>
-                <div class="form-element"><input type="text" name="user_fname" id="user_fname" required></div>
-            </div>
-            <div class="error">{{ fname_error }}</div>
-
-            <div class="form-set">
-                <div class="form-label">Last name:</div>
-                <div class="form-element"><input type="text" name="user_lname" id="user_lname" required></div>
-            </div>
-            <div class="error">{{ lname_error }}</div>
-
-            <div class="form-set">
-                <div class="form-label">Username:</div>
-                <div class="form-element"><input type="text" name="user_username" id="user_username" required></div>
-            </div>
-            <div class="error">{{ username_error }}</div>
-
-            <div class="form-set">
-                <div class="form-label">Email:</div>
-                <div class="form-element"><input type="email" name="email" id="email" required></div>
+                <div class="form-label">
+                    <input type="checkbox" class="user_fname" checked>
+                    First name:
+                </div>
+                <div class="form-element"><input type="text" name="user_fname" class="user_fname" required></div>
             </div>
 
             <div class="form-set">
-                <div class="form-label">Password:</div>
-                <div class="form-element"><input type="password" name="password" id="password" required></div>
-            </div>
-            <div class="error">{{ error }}</div>
-
-            <div class="form-set">
-                <div class="form-label">Confirm Password:</div>
-                <div class="form-element"><input type="password" name="password2" id="password2" required></div>
+                <div class="form-label">
+                    <input type="checkbox" class="user_lname" checked>
+                    Last name:
+                </div>
+                <div class="form-element"><input type="text" name="user_lname" class="user_lname" required></div>
             </div>
 
             <div class="form-set">
-                <div class="form-label">Are you a:</div>
-                <div style="padding-top: 1.5%">
-                    <div class="form-check-inline">
-                      <label class="form-check-label">
-                        <input type="radio" class="form-check-input" name="category" id="category" value="Student" checked>Student
-                      </label>
-                    </div>
-                    <div class="form-check-inline">
-                      <label class="form-check-label">
-                        <input type="radio" class="form-check-input" name="category" id="category" value="Teacher">Teacher
-                      </label>
-                    </div>
+                <div class="form-label">
+                    <input type="checkbox" class="user_username" checked>
+                    Username:
+                </div>
+                <div class="form-element"><input type="text" name="user_username" class="user_username" required></div>
+            </div>
+
+            <div class="form-set">
+                <div class="form-label">
+                    <input type="checkbox" class="email" checked>
+                    Email:
+                </div>
+                <div class="form-element"><input type="email" name="email" class="email" required></div>
+            </div>
+
+            <div class="form-set">
+                <div class="form-label">
+                    <input type="checkbox" class="password" id="password" checked>
+                    Password:
+                </div>
+                <div class="form-element"><input type="password" name="password" class="password" required></div>
+            </div>
+
+            <div class="form-set">
+                <div class="form-label">
+                    <input type="checkbox" class="password" id="password2" checked>
+                    Confirm Password:
+                </div>
+                <div class="form-element"><input type="password" name="password2" class="password" required></div>
+            </div>
+
+            <div class="form-set">
+                <div class="form-label">
+                    <input type="checkbox" class="category">
+                    Are you a:
+                </div>
+                <div class="form-element">
+                    <select name="category" class="category" required disabled>
+                        <option value="Student">Student</option>
+                        <option value="Teacher">Teacher</option>
+                    </select>
                 </div>
             </div>
-            
             <div>
                 <div class="form-label" style="padding: 0.3rem"></div>
+                <div style="padding-top: 3.5%"></div>
                 <button type="submit" value="Save" class="btn btn-primary">Save</button>
             </div>
         </form>

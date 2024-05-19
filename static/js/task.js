@@ -2,20 +2,52 @@
 const matchacc = document.querySelectorAll("a.nav-link.account")
 matchacc.forEach((userItem) => {
     userItem.style.display = 'none'
-});
+})
 
 const matchadm = document.querySelectorAll("a.nav-link.admin")
 matchadm.forEach((userItem) => {
     userItem.style.display = 'none'
-});
+})
 
 const matchalert = document.querySelectorAll("#alert")
 matchalert.forEach((userItem) => {
     userItem.style.display = 'none'
-});
+})
 
 document.querySelector("#alert_logout").style.display = 'none'
+
 document.querySelector("#alert_delete_account").style.display = 'none'
+
+function disabled(match){
+    match.forEach((userItem) => {
+        if (userItem.disabled == true){
+            userItem.disabled = false
+            if (userItem.classList.contains('password')){
+                document.querySelector("input[type=checkbox].password#password").checked = true
+                document.querySelector("input[type=checkbox].password#password2").checked = true
+            }
+        }
+        else{
+            userItem.disabled = true
+            if (userItem.classList.contains('password')){
+                document.querySelector("input[type=checkbox].password#password").checked = false
+                document.querySelector("input[type=checkbox].password#password2").checked = false
+            }
+        }
+    })
+}
+
+const matchcheckbox = document.querySelectorAll("input[type=checkbox]")
+matchcheckbox.forEach((userItem) => {
+    userItem.style.display = 'inline'
+    userItem.addEventListener('click', () => {
+        disabled(document.querySelectorAll(`select.${userItem.className}`))
+        disabled(document.querySelectorAll(`input[type=text].${userItem.className}`))
+        disabled(document.querySelectorAll(`input[type=email].${userItem.className}`))
+        disabled(document.querySelectorAll(`input[type=password].${userItem.className}`))
+    })
+})
+
 
 // Show account navigation
 function eventClick(){
@@ -23,12 +55,12 @@ function eventClick(){
         if (matchacc[0].style.display == 'none'){
             matchacc.forEach((userItem) => {
                 userItem.style.display = 'block'
-            });
+            })
         }
         else{
             matchacc.forEach((userItem) => {
                 userItem.style.display = 'none'
-            });
+            })
         }
     })
 
@@ -36,12 +68,12 @@ function eventClick(){
         if (matchadm[0].style.display == 'none'){
             matchadm.forEach((userItem) => {
                 userItem.style.display = 'block'
-            });
+            })
         }
         else{
             matchadm.forEach((userItem) => {
                 userItem.style.display = 'none'
-            });
+            })
         }
     })
 }
@@ -50,7 +82,7 @@ function eventClick(){
 function alert(type) {   
     matchalert.forEach((userItem) => {
         userItem.style.display = 'block'
-    });
+    })
     if (type == 'logout'){
         document.querySelector("#alert_logout").style.display = 'block'
         document.querySelector("#alert_delete_account").style.display = 'none'
@@ -62,7 +94,7 @@ function alert(type) {
     if (type == ''){
         matchalert.forEach((userItem) => {
             userItem.style.display = 'none'
-        });
+        })
         document.querySelector("#alert_logout").style.display = 'none'
         document.querySelector("#alert_delete_account").style.display = 'none'
     }

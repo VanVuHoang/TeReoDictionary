@@ -49,6 +49,10 @@ a:hover {color: cyan; text-decoration: none}
     float: left;
 }
 
+.form-element input{
+    width: 100%;
+}
+
 
 /* Account button css */
 .accbtn {
