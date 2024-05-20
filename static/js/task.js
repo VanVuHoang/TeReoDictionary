@@ -16,9 +16,37 @@ matchalert.forEach((userItem) => {
 
 const matchcheckbox = document.querySelectorAll("input[type=checkbox]")
 
-document.querySelector("#alert_logout").style.display = 'none'
 
-document.querySelector("#alert_delete_account").style.display = 'none'
+// Disable edit
+function disabled(match){
+    match.forEach((userItem) => {
+        // Checking either "Password" or "Confirm Password" affects both
+        if (userItem.disabled == true){
+            userItem.disabled = false
+            if (userItem.classList.contains('password')){
+                document.querySelector("input[type=checkbox].password#password").checked = true
+                document.querySelector("input[type=checkbox].password#password2").checked = true
+            }
+        }
+        else{
+            userItem.disabled = true
+            if (userItem.classList.contains('password')){
+                document.querySelector("input[type=checkbox].password#password").checked = false
+                document.querySelector("input[type=checkbox].password#password2").checked = false
+            }
+        }
+    })
+}
+
+matchcheckbox.forEach((userItem) => {
+    userItem.addEventListener('click', () => {
+        disabled(document.querySelectorAll(`select.${userItem.className}`))
+        disabled(document.querySelectorAll(`input[type=text].${userItem.className}`))
+        disabled(document.querySelectorAll(`input[type=email].${userItem.className}`))
+        disabled(document.querySelectorAll(`input[type=password].${userItem.className}`))
+        disabled(document.querySelectorAll(`input[type=radio].${userItem.className}`))
+    })
+})
 
 
 // Show account navigation
@@ -54,6 +82,7 @@ function eventClick(){
 // Show account alert
 function alert(type) {  
     if (Number.isInteger(type)){
+        // Loop until the right item
         let i = 0
         let j = 0
         const matchdelcfm = document.querySelectorAll("#delete_word_confirm")
@@ -76,6 +105,7 @@ function alert(type) {
         matchalert.forEach((userItem) => {
             userItem.style.display = 'block'
         })
+        // Corresponding alert
         if (type == 'logout'){
             document.querySelector("#alert_logout").style.display = 'block'
             document.querySelector("#alert_delete_account").style.display = 'none'
@@ -93,37 +123,6 @@ function alert(type) {
         }
     }
 }
-
-
-// Disable edit
-function disabled(match){
-    match.forEach((userItem) => {
-        if (userItem.disabled == true){
-            userItem.disabled = false
-            if (userItem.classList.contains('password')){
-                document.querySelector("input[type=checkbox].password#password").checked = true
-                document.querySelector("input[type=checkbox].password#password2").checked = true
-            }
-        }
-        else{
-            userItem.disabled = true
-            if (userItem.classList.contains('password')){
-                document.querySelector("input[type=checkbox].password#password").checked = false
-                document.querySelector("input[type=checkbox].password#password2").checked = false
-            }
-        }
-    })
-}
-
-matchcheckbox.forEach((userItem) => {
-    userItem.style.display = 'inline'
-    userItem.addEventListener('click', () => {
-        disabled(document.querySelectorAll(`select.${userItem.className}`))
-        disabled(document.querySelectorAll(`input[type=text].${userItem.className}`))
-        disabled(document.querySelectorAll(`input[type=email].${userItem.className}`))
-        disabled(document.querySelectorAll(`input[type=password].${userItem.className}`))
-    })
-})
 
 
 eventClick()
