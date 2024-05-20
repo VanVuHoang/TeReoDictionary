@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>
@@ -19,17 +18,16 @@
 </head>
 
 <body>
-    <!--Navbar-->
     <nav class="navbar navbar-expand-lg rounded" id="beach">
-        <div class="col-md-3"><div style="color: cyan; text-align: center;">{{log}}</div></div>
+        <div class="col-md-2"><div style="color: cyan; text-align: center;">{{log}}</div></div>
         <div class="collapse navbar-collapse">
-            <!--Account-->
+            <!--Navbar-->
             <ul class="navbar-nav mr-auto">
                 <li><a class="nav-link accbtn" href="/">Home</a></li>
                 {% if logged_in %}
                 {% if teacher %}
                 <button class="nav-link accbtn" id="adm" onclick=alert("")><a href="#">Admin</a></button>
-                <li><a class="nav-link admin" href="/add_word" onclick="document.getElementById('word_level').getElementsByTagName('option')[27].selected = 'selected';">Add Word</a></li>
+                <li><a class="nav-link admin" href="/add_word">Add Word</a></li>
                 {% endif %}
                 <button class="nav-link accbtn" id="acc" onclick=alert("")><a href="#">Account</a></button>
                 <li><a class="nav-link account" href="#logout?" onclick=alert("logout")>Logout</a></li>
@@ -41,10 +39,10 @@
                 {% endif %}
             </ul>
 
-            <!--Account alert-->
+            <!--Alert-->
             <span id="alert" style="padding: 0.5rem 1rem; color: white">Are you sure?</span>
-            <button class="nav-link accbtn" id="alert_logout"><a href="/logout_account">Yes</a></button>
-            <button class="nav-link accbtn" id="alert_delete_account"><a href="/delete_account">Yes</a></button>
+            <button class="nav-link accbtn" id="alert_logout" style="display: none"><a href="/logout_account">Yes</a></button>
+            <button class="nav-link accbtn" id="alert_delete_account" style="display: none"><a href="/delete_account">Yes</a></button>
             <button class="nav-link accbtn" id="alert" onclick=alert("")><a href="#">No</a></button>
 
             <!--Search-->
@@ -57,5 +55,4 @@
     {% block content %}{% endblock %}
     <script src="static/js/task.js"></script>
 </body>
-
 </html>

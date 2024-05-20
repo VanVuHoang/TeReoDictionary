@@ -8,6 +8,7 @@ Signup
 <div class="form-border">
     <center>
         <h4>Edit account</h4>
+        <!--First & last name, username, email, password, category w/ checkbox-->
         <form class="myform" method="POST">
             <div class="form-set">
                 <div class="form-label">
@@ -59,19 +60,25 @@ Signup
 
             <div class="form-set">
                 <div class="form-label">
-                    <input type="checkbox" class="category">
+                    <input type="checkbox" class="category" id="category">
                     Are you a:
                 </div>
-                <div class="form-element">
-                    <select name="category" class="category" required disabled>
-                        <option value="Student">Student</option>
-                        <option value="Teacher">Teacher</option>
-                    </select>
+                <div style="padding-top: 1.5%">
+                    <div class="form-check-inline">
+                        <label class="form-check-label">
+                        <input type="radio" class="category form-check-input" name="category" value="Student" disabled>Student
+                        </label>
+                    </div>
+                    <div class="form-check-inline">
+                        <label class="form-check-label">
+                        <input type="radio" class="category form-check-input" name="category" value="Teacher" disabled>Teacher
+                        </label>
+                    </div>
                 </div>
             </div>
+
             <div>
                 <div class="form-label" style="padding: 0.3rem"></div>
-                <div style="padding-top: 3.5%"></div>
                 <button type="submit" value="Save" class="btn btn-primary">Save</button>
             </div>
         </form>
