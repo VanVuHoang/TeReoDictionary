@@ -24,7 +24,7 @@ Home
             <p><strong>Translation:</strong> {{ word[1] }}</p>
             <p><strong>Type:</strong> {{ word[2] }}</p>
             <p><strong>Definition:</strong> {{ word[3] }}</p>
-            <p><strong>User:</strong> {{ users[word[4]] }}</p>
+            <p><strong>User:</strong> {{ users[word[4]] }} ({{ active[word[4]] }})</p>
 
             <!--Delete word-->
             {% if teacher %}
@@ -39,5 +39,4 @@ Home
     </div>
     {% endfor %}
 </div>
-<hr>
 {% endblock %}

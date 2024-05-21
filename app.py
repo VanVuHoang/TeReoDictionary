@@ -51,7 +51,7 @@ def is_logged_in():
 def logged():
     log="Not logged in"
     if is_logged_in():
-        log=f"Logged in as {session.get('user_category')} ({session.get('user_username')})"
+        log=f"{session.get('user_username')} ({session.get('user_category')})"
     return log
 
 def status(category):
@@ -78,15 +78,17 @@ def render_all():
     word_tuple=execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, record_id FROM words INNER JOIN types ON words.word_type=types.type_id INNER JOIN records ON words.word_id=records.word_id INNER JOIN images ON words.word_image=images.image_id')
 
     ### Get users
-    user_dict = {}
-    user_tuple=execute(DATABASE, f'SELECT user_id, user_username FROM users')
+    username_dict = {}
+    active_dict = {}
+    user_tuple=execute(DATABASE, f'SELECT user_id, user_username, user_status FROM users')
     for user in user_tuple:
-        user_dict[user[0]] = user[1]
+        username_dict[user[0]] = user[1]
+        active_dict[user[0]] = user[2]
 
     ### Get types
     type_tuple=execute(DATABASE, f'SELECT type_id, type_name FROM types')
 
-    return render_template('home.html', words=word_tuple, types=type_tuple, users=user_dict, logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
+    return render_template('home.html', words=word_tuple, types=type_tuple, users=username_dict, active=active_dict, logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
 @app.route('/type=<word_type>')
 def render_word(word_type):
@@ -98,15 +100,17 @@ def render_word(word_type):
         word_tuple=execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, record_id FROM words INNER JOIN types ON words.word_type=types.type_id INNER JOIN records ON words.word_id=records.word_id INNER JOIN images ON words.word_image=images.image_id WHERE words.word_type={type_id}')
 
         ### Get users
-        user_dict = {}
-        user_tuple=execute(DATABASE, f'SELECT user_id, user_username FROM users')
+        username_dict = {}
+        active_dict = {}
+        user_tuple=execute(DATABASE, f'SELECT user_id, user_username, user_status FROM users')
         for user in user_tuple:
-            user_dict[user[0]] = user[1]
+            username_dict[user[0]] = user[1]
+            active_dict[user[0]] = user[2]
 
         ### Get types
         type_tuple=execute(DATABASE, f'SELECT type_id, type_name FROM types')
 
-        return render_template('home.html', words=word_tuple, types=type_tuple, users=user_dict, logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
+        return render_template('home.html', words=word_tuple, types=type_tuple, users=username_dict, active=active_dict, logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
     return ""
 
 
@@ -117,7 +121,7 @@ def search():
     query = request.args.get('query') 
 
     ### Get words
-    word_tuple=execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, record_id FROM words INNER JOIN types ON words.word_type=types.type_id INNER JOIN records ON words.word_id=records.word_id INNER JOIN images ON words.word_image=images.image_id WHERE LOWER(word_name)=LOWER("{query}") OR LOWER(word_translation)=LOWER("{query}")')
+    word_tuple=execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, record_id, user_status FROM words INNER JOIN types ON words.word_type=types.type_id INNER JOIN records ON words.word_id=records.word_id INNER JOIN images ON words.word_image=images.image_id WHERE LOWER(word_name)=LOWER("{query}") OR LOWER(word_translation)=LOWER("{query}")')
 
     ### Get users
     user_dict = {}
@@ -139,33 +143,38 @@ def render_signup():
         return redirect("/")
     if request.method == "POST":
         ### Get credentials
-        user_fname=request.form.get('user_fname').title().strip()
-        user_lname=request.form.get('user_lname').title().strip()
-        user_username=request.form.get('user_username').strip()
-        email=request.form.get('email').lower().strip()
-        password=request.form.get('password')
-        password2=request.form.get('password2')
-        user_category=request.form.get('category')
+        try:
+            user_fname=request.form.get('user_fname').title().strip()
+            user_lname=request.form.get('user_lname').title().strip()
+            user_username=request.form.get('user_username').strip()
+            email=request.form.get('email').lower().strip()
+            password=request.form.get('password')
+            password2=request.form.get('password2')
+            user_category=request.form.get('category')
 
-        ### Confirm password
-        if password != password2:
-            return redirect("/signup_account?error=Passwords+do+not+match")
-        if len(password) < 8:
-            return redirect("/signup_account?error=Password+must+be+at+least+8+characters")
-        hashed_password=bcrypt.generate_password_hash(password).decode('utf-8')
+            ### Confirm password
+            if password != password2:
+                return redirect("/signup_account?error=Passwords+do+not+match")
+            if len(password) < 8:
+                return redirect("/signup_account?error=Password+must+be+at+least+8+characters")
+            hashed_password=bcrypt.generate_password_hash(password).decode('utf-8')
 
-        ### Logging
-        id_count=int(fetch(DATABASE, f'SELECT COUNT (*) FROM users')[0]) + 1
-        execute(DATABASE, f'INSERT INTO users (user_id, user_fname, user_lname, user_username, user_email, user_pass, user_category) VALUES ({id_count}, "{user_fname}", "{user_lname}", "{user_username}", "{email}", "{hashed_password}", "{user_category}")')
-        session['email']=email
-        session['password']=password
-        session['id']=id_count
-        session['user_fname']=user_fname
-        session['user_lname']=user_lname
-        session['user_username']=user_username
-        session['user_category']=user_category
+            ### Logging
+            id_count=int(fetch(DATABASE, f'SELECT COUNT (*) FROM users')[0]) + 1
+            execute(DATABASE, f'INSERT INTO users (user_id, user_fname, user_lname, user_username, user_email, user_pass, user_category, user_status) VALUES ({id_count}, "{user_fname}", "{user_lname}", "{user_username}", "{email}", "{hashed_password}", "{user_category}", "Active")')
+            session['email']=email
+            session['password']=password
+            session['id']=id_count
+            session['user_fname']=user_fname
+            session['user_lname']=user_lname
+            session['user_username']=user_username
+            session['user_category']=user_category
 
-        return redirect("/?message=Signup+successful!")
+            return redirect("/?message=Signup+successful!")
+        
+        ### Confirm unique email
+        except sqlite3.IntegrityError:
+            return redirect("/signup_account?error=Email+already+exists")
     return render_template('account/signup.html', logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
 @app.route('/login_account', methods=['POST', 'GET'])
@@ -202,7 +211,8 @@ def logout():
 
 @app.route('/delete_account')
 def delete_account():
-    execute(DATABASE, f"DELETE FROM users WHERE user_id={session['id']}")
+    execute(DATABASE, f'UPDATE users SET user_status = "Inactive" WHERE user_id = {session["id"]}')
+    execute(DATABASE, f'UPDATE users SET user_email = NULL WHERE user_id = {session["id"]}')
     [session.pop(key) for key in list(session.keys())]
     return redirect('/?message=Account+is+successfully+deleted!')
 
@@ -294,9 +304,9 @@ def add_word():
     if request.method == "POST":
         ### Get record w/ placeholder image if needed
         word_name=request.form.get('word_name').title().strip()
-        word_translation=request.form.get('word_translation').title().strip()
+        word_translation=request.form.get('word_translation').strip()
         word_type=request.form.get('word_type').split(", ")[0]
-        word_definition=request.form.get('word_definition').title().strip()
+        word_definition=request.form.get('word_definition').strip()
         if request.form.get('word_image') != None:
             word_image=request.form.get('word_image').split(", ")[0]
         else:
