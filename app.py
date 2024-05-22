@@ -121,18 +121,20 @@ def search():
     query = request.args.get('query') 
 
     ### Get words
-    word_tuple=execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, record_id, user_status FROM words INNER JOIN types ON words.word_type=types.type_id INNER JOIN records ON words.word_id=records.word_id INNER JOIN images ON words.word_image=images.image_id WHERE LOWER(word_name)=LOWER("{query}") OR LOWER(word_translation)=LOWER("{query}")')
+    word_tuple=execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, record_id FROM words INNER JOIN types ON words.word_type=types.type_id INNER JOIN records ON words.word_id=records.word_id INNER JOIN images ON words.word_image=images.image_id WHERE LOWER(word_name)=LOWER("{query}") OR LOWER(word_translation)=LOWER("{query}")')
 
     ### Get users
-    user_dict = {}
-    user_tuple=execute(DATABASE, f'SELECT user_id, user_username FROM users')
+    username_dict = {}
+    active_dict = {}
+    user_tuple=execute(DATABASE, f'SELECT user_id, user_username, user_status FROM users')
     for user in user_tuple:
-        user_dict[user[0]] = user[1]
+        username_dict[user[0]] = user[1]
+        active_dict[user[0]] = user[2]
 
     ### Get types
     type_tuple=execute(DATABASE, f'SELECT type_id, type_name FROM types')
 
-    return render_template('home.html', words=word_tuple, types=type_tuple, users=user_dict, logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
+    return render_template('home.html', words=word_tuple, types=type_tuple, users=username_dict, active=active_dict, logged_in=is_logged_in(), log=logged(), teacher=status("Teacher"))
 
 
 # Account
