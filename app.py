@@ -133,7 +133,7 @@ def search():
     ### Get words
     word_tuple = execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, record_id FROM words INNER JOIN types ON words.word_type = types.type_id INNER JOIN records ON words.word_id = records.word_id INNER JOIN images ON words.word_image = images.image_id WHERE LOWER(word_name) = LOWER("{query}") OR LOWER(word_translation) = LOWER("{query}")')
 
-        ### Get displayed words count
+    ### Get displayed words count
     count_list = []
     for i in range(len(word_tuple)):
         count_list.append(i+1)
@@ -331,7 +331,7 @@ def add_word():
         
         ### Add word with corresponding id
         word_id_count = int(fetch(DATABASE, f'SELECT COUNT (*) FROM words')[0]) + 1
-        execute(DATABASE, f'INSERT INTO words (word_id, word_name, word_translation, word_type, word_definition, word_image) VALUES ({word_id_count}, "{word_name}", "{word_translation}", "{word_type}", "{word_definition}", "{word_image}")')
+        execute(DATABASE, f'INSERT INTO words (word_id, word_name, word_translation, word_type, word_definition, word_image) VALUES ({word_id_count}, "{word_name}", "{word_translation}", {word_type}, "{word_definition}", {word_image})')
 
         ### Add record with corresponding id
         record_id_count = int(fetch(DATABASE, f'SELECT COUNT (*) FROM records')[0]) + 1
