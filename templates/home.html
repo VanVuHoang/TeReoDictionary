@@ -15,7 +15,7 @@ Home
 </div>
 
 <div class="words">
-    {% for word in words %}
+    {% for word, count in words_and_counts %}
     <div class="word-box">
         <div class="word-box-info">
             <!--Word info-->
@@ -29,7 +29,7 @@ Home
             <!--Delete word-->
             {% if teacher %}
             <center>
-                <button type="submit" value="Delete" class="btn btn-primary" id="delete_word_confirm" onclick=alert({{ word[6] }})>Delete?</button>
+                <button type="submit" value="Delete" class="btn btn-primary" id="delete_word_confirm" onclick=alert({{ count }})>Delete?</button>
                 <form action="/deleting_word/{{ word[6] }}">
                     <button type="submit" value="Delete" class="btn btn-danger" id="delete_word" style="display: none">Delete</button>
                 </form>

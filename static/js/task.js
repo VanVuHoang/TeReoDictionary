@@ -93,7 +93,6 @@ function alert(type) {
             }
         })
         const matchdel = document.querySelectorAll("#delete_word")
-        console.log(matchdel)
         matchdel.forEach((userItem) => {
             j = j + 1
             if (j == type){
