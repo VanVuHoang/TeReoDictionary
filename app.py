@@ -171,9 +171,9 @@ def render_signup():
 
             ### Confirm password
             if password !=  password2:
-                return redirect("/signup_account?error = Passwords+do+not+match")
+                return redirect("/signup_account?error=Passwords+do+not+match")
             if len(password) < 8:
-                return redirect("/signup_account?error = Password+must+be+at+least+8+characters")
+                return redirect("/signup_account?error=Password+must+be+at+least+8+characters")
             hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
             ### Logging
@@ -187,11 +187,11 @@ def render_signup():
             session['user_username'] = user_username
             session['user_category'] = user_category
 
-            return redirect("/?message = Signup+successful!")
+            return redirect("/?message=Signup+successful!")
         
         ### Confirm unique email
         except sqlite3.IntegrityError:
-            return redirect("/signup_account?error = Email+already+exists")
+            return redirect("/signup_account?error=Email+already+exists")
     return render_template('account/signup.html', logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"))
 
 @app.route('/login_account', methods = ['POST', 'GET'])
@@ -205,9 +205,9 @@ def render_login():
         try:
             credentials(email)
         except TypeError:
-            return redirect("/login_account?error = Invalid+username+or+password")
+            return redirect("/login_account?error=Invalid+username+or+password")
         if not bcrypt.check_password_hash(credentials(email)[0], password):
-            return redirect(request.referrer + "?error = Email+invalid+or+password+incorrect")
+            return redirect(request.referrer + "?error=Email+invalid+or+password+incorrect")
         session['email'] = email
         session['password'] = credentials(email)[0]
         session['id'] = credentials(email)[1]
@@ -216,7 +216,7 @@ def render_login():
         session['user_username'] = credentials(email)[4]
         session['user_category'] = credentials(email)[5]
 
-        return redirect("/?message = Login+successful!")
+        return redirect("/?message=Login+successful!")
     return render_template('account/login.html', logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"))
 
 
@@ -224,14 +224,14 @@ def render_login():
 @app.route('/logout_account')
 def logout():
     [session.pop(key) for key in list(session.keys())]
-    return redirect('/?message = Logout+successful!')
+    return redirect('/?message=Logout+successful!')
 
 @app.route('/delete_account')
 def delete_account():
     execute(DATABASE, f'UPDATE users SET user_status = "Inactive" WHERE user_id = {session["id"]}')
     execute(DATABASE, f'UPDATE users SET user_email = NULL WHERE user_id = {session["id"]}')
     [session.pop(key) for key in list(session.keys())]
-    return redirect('/?message = Account+is+successfully+deleted!')
+    return redirect('/?message=Account+is+successfully+deleted!')
 
 
 ## Edit account
@@ -278,9 +278,9 @@ def render_edit():
 
         ### Confirm password
         if password !=  password2:
-            return redirect("/edit_account?error = Passwords+do+not+match")
+            return redirect("/edit_account?error=Passwords+do+not+match")
         if len(password) < 8:
-            return redirect("/edit_account?error = Password+must+be+at+least+8+characters")
+            return redirect("/edit_account?error=Password+must+be+at+least+8+characters")
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
         ### Update credentials of corresponding user
@@ -297,7 +297,7 @@ def render_edit():
         session['user_username'] = user_username
         session['user_category'] = user_category
 
-        return redirect("/?message = Account+is+successfully+edited!")
+        return redirect("/?message=Account+is+successfully+edited!")
     return render_template('account/edit.html', logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"))
 
 
@@ -306,7 +306,7 @@ def render_edit():
 @app.route('/add_word')
 def render_addword():
     if not is_logged_in():
-        return redirect('/?message = Need+to+be+logged+in.')
+        return redirect('/?message=Need+to+be+logged+in.')
     ### Get words, types, images
     word_tuple = execute(DATABASE, f'SELECT word_id, word_name FROM words')
     type_tuple = execute(DATABASE, f'SELECT type_id, type_name FROM types')
@@ -317,7 +317,7 @@ def render_addword():
 @app.route('/adding_word', methods = ['POST'])
 def add_word():
     if not is_logged_in():
-        return redirect('/?message = Need+to+be+logged+in.')
+        return redirect('/?message=Need+to+be+logged+in.')
     if request.method == "POST":
         ### Get record w/ placeholder image if needed
         word_name = request.form.get('word_name').title().strip()
@@ -337,7 +337,7 @@ def add_word():
         record_id_count = int(fetch(DATABASE, f'SELECT COUNT (*) FROM records')[0]) + 1
         execute(DATABASE, f'INSERT INTO records (record_id, word_id, user_id) VALUES ({record_id_count}, {word_id_count}, {session["id"]})')
 
-        return redirect("/?message = Word+is+successfully+added!")
+        return redirect("/?message=Word+is+successfully+added!")
     return render_template("admin/add_word.html", logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"))
 
 
@@ -345,7 +345,7 @@ def add_word():
 @app.route('/deleting_word/<record_id>')
 def deleting_word(record_id):
     if not is_logged_in():
-        return redirect('/?message = Need+to+be+logged+in.')
+        return redirect('/?message=Need+to+be+logged+in.')
     ### Delete word, record with corresponding id
     word_id = fetch(DATABASE, f'SELECT words.word_id FROM words INNER JOIN records ON words.word_id = records.word_id WHERE record_id = {record_id}')[0]
     execute(DATABASE, f'DELETE FROM words WHERE word_id = {word_id}')
@@ -358,4 +358,4 @@ def deleting_word(record_id):
         execute(DATABASE, f'UPDATE records SET record_id = "{word_id + i}" WHERE word_id = {word_id + i + 1}')
         execute(DATABASE, f'UPDATE records SET word_id = "{word_id + i}" WHERE word_id = {word_id + i + 1}')
 
-    return redirect("/?message = Word+is+successfully+deleted!")
+    return redirect("/?message=Word+is+successfully+deleted!")
