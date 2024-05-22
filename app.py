@@ -120,7 +120,6 @@ def render_word(word_type):
     type_tuple = execute(DATABASE, f'SELECT type_id, type_name FROM types')
 
     return render_template('home.html', words_and_counts = zip(word_tuple, count_list), types = type_tuple, users = username_dict, active = active_dict, logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"))
-    return ""
 
 
 ## Search word
