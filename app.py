@@ -97,30 +97,29 @@ def render_all():
 
 @app.route('/type=<word_type>')
 def render_word(word_type):
-    if word_type !=  "favicon.ico":
-        ### Get designated type
-        type_id = fetch(DATABASE, f'SELECT type_id FROM types WHERE LOWER(type_name) = "{word_type}"')[0]
+    ### Get designated type
+    type_id = fetch(DATABASE, f'SELECT type_id FROM types WHERE LOWER(type_name) = "{word_type}"')[0]
 
-        ### Get words
-        word_tuple = execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, record_id FROM words INNER JOIN types ON words.word_type = types.type_id INNER JOIN records ON words.word_id = records.word_id INNER JOIN images ON words.word_image = images.image_id WHERE words.word_type = {type_id}')
+    ### Get words
+    word_tuple = execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, record_id FROM words INNER JOIN types ON words.word_type = types.type_id INNER JOIN records ON words.word_id = records.word_id INNER JOIN images ON words.word_image = images.image_id WHERE words.word_type = {type_id}')
 
-        ### Get displayed words count
-        count_list = []
-        for i in range(len(word_tuple)):
-            count_list.append(i+1)
+    ### Get displayed words count
+    count_list = []
+    for i in range(len(word_tuple)):
+        count_list.append(i+1)
 
-        ### Get users
-        username_dict = {}
-        active_dict = {}
-        user_tuple = execute(DATABASE, f'SELECT user_id, user_username, user_status FROM users')
-        for user in user_tuple:
-            username_dict[user[0]] = user[1]
-            active_dict[user[0]] = user[2]
+    ### Get users
+    username_dict = {}
+    active_dict = {}
+    user_tuple = execute(DATABASE, f'SELECT user_id, user_username, user_status FROM users')
+    for user in user_tuple:
+        username_dict[user[0]] = user[1]
+        active_dict[user[0]] = user[2]
 
-        ### Get types
-        type_tuple = execute(DATABASE, f'SELECT type_id, type_name FROM types')
+    ### Get types
+    type_tuple = execute(DATABASE, f'SELECT type_id, type_name FROM types')
 
-        return render_template('home.html', words_and_counts = zip(word_tuple, count_list), types = type_tuple, users = username_dict, active = active_dict, logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"))
+    return render_template('home.html', words_and_counts = zip(word_tuple, count_list), types = type_tuple, users = username_dict, active = active_dict, logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"))
     return ""
 
 
