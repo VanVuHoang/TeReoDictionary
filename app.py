@@ -95,7 +95,7 @@ def render_all():
 
     return render_template('home.html', words_and_counts = zip(word_tuple, count_list), types = type_tuple, users = username_dict, active = active_dict, logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"))
 
-@app.route('/type = <word_type>')
+@app.route('/type=<word_type>')
 def render_word(word_type):
     if word_type !=  "favicon.ico":
         ### Get designated type
