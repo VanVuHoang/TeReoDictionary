@@ -75,7 +75,7 @@ def credentials(email):
 @app.route('/')
 def render_all():
     ### Get words
-    word_tuple = execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, record_id FROM words INNER JOIN types ON words.word_type = types.type_id INNER JOIN records ON words.word_id = records.word_id INNER JOIN images ON words.word_image = images.image_id')
+    word_tuple = execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, word_date, word_time, record_id FROM words INNER JOIN types ON words.word_type = types.type_id INNER JOIN records ON words.word_id = records.word_id INNER JOIN images ON words.word_image = images.image_id')
 
     ### Get users
     username_dict = {}
@@ -101,7 +101,7 @@ def render_word(word_type):
     type_id = fetch(DATABASE, f'SELECT type_id FROM types WHERE LOWER(type_name) = "{word_type}"')[0]
 
     ### Get words
-    word_tuple = execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, record_id FROM words INNER JOIN types ON words.word_type = types.type_id INNER JOIN records ON words.word_id = records.word_id INNER JOIN images ON words.word_image = images.image_id WHERE words.word_type = {type_id}')
+    word_tuple = execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, word_date, word_time, record_id FROM words INNER JOIN types ON words.word_type = types.type_id INNER JOIN records ON words.word_id = records.word_id INNER JOIN images ON words.word_image = images.image_id WHERE words.word_type = {type_id}')
 
     ### Get displayed words count
     count_list = []
@@ -129,7 +129,7 @@ def search():
     query = request.args.get('query') 
 
     ### Get words
-    word_tuple = execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, record_id FROM words INNER JOIN types ON words.word_type = types.type_id INNER JOIN records ON words.word_id = records.word_id INNER JOIN images ON words.word_image = images.image_id WHERE LOWER(word_name) = LOWER("{query}") OR LOWER(word_translation) = LOWER("{query}")')
+    word_tuple = execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, word_date, word_time, record_id FROM words INNER JOIN types ON words.word_type = types.type_id INNER JOIN records ON words.word_id = records.word_id INNER JOIN images ON words.word_image = images.image_id WHERE LOWER(word_name) = LOWER("{query}") OR LOWER(word_translation) = LOWER("{query}")')
 
     ### Get displayed words count
     count_list = []
@@ -306,11 +306,10 @@ def render_addword():
     if not is_logged_in():
         return redirect('/?message=Need+to+be+logged+in.')
     ### Get words, types, images
-    word_tuple = execute(DATABASE, f'SELECT word_id, word_name FROM words')
     type_tuple = execute(DATABASE, f'SELECT type_id, type_name FROM types')
     image_tuple = execute(DATABASE, f'SELECT image_id, image_name FROM images WHERE image_id !=  1')
 
-    return render_template("admin/add_word.html", logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"), words = word_tuple, types = type_tuple, images = image_tuple)
+    return render_template("admin/add_word.html", logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"), types = type_tuple, images = image_tuple)
 
 @app.route('/adding_word', methods = ['POST'])
 def add_word():
@@ -326,10 +325,13 @@ def add_word():
             word_image = request.form.get('word_image').split(", ")[0]
         else:
             word_image = 1
+        word_datetime = execute(DATABASE, f'SELECT CURRENT_TIMESTAMP')[0][0].split()
+        word_date = word_datetime[0]
+        word_time = word_datetime[1]
         
         ### Add word with corresponding id
         word_id_count = int(fetch(DATABASE, f'SELECT COUNT (*) FROM words')[0]) + 1
-        execute(DATABASE, f'INSERT INTO words (word_id, word_name, word_translation, word_type, word_definition, word_image) VALUES ({word_id_count}, "{word_name}", "{word_translation}", {word_type}, "{word_definition}", {word_image})')
+        execute(DATABASE, f'INSERT INTO words (word_id, word_name, word_translation, word_type, word_definition, word_image, word_date, word_time) VALUES ({word_id_count}, "{word_name}", "{word_translation}", {word_type}, "{word_definition}", {word_image}, "{word_date}", "{word_time}")')
 
         ### Add record with corresponding id
         record_id_count = int(fetch(DATABASE, f'SELECT COUNT (*) FROM records')[0]) + 1
