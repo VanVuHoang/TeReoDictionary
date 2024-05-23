@@ -12,18 +12,18 @@ Add word
         <form class="myform" method="POST" action="/adding_word">
             <div class="form-set">
                 <div class="form-label">Word:</div>
-                <div class="form-element"><input type="text" name="word_name" class="word_name" required></div>
+                <div class="form-element"><input type="text" name="word_name" class="word_name" maxlength="85" required></div>
             </div>
 
             <div class="form-set">
                 <div class="form-label">Translation:</div>
-                <div class="form-element"><input type="text" name="word_translation" class="word_translation" required></div>
+                <div class="form-element"><input type="text" name="word_translation" class="word_translation" maxlength="85" required></div>
             </div>
 
             <div class="form-set">
                 <div class="form-label">Type:</div>
                 <div class="form-element">
-                    <select name="word_type">
+                    <select name="word_type" required>
                         {% for type in types %}
                         <option value="{{ type[0] }}, {{ type[1] }}">{{ type[1] }}</option>
                         {% endfor %}
@@ -33,7 +33,7 @@ Add word
 
             <div class="form-set">
                 <div class="form-label">Definition:</div>
-                <div class="form-element"><input type="text" name="word_definition" class="word_definition" required></div>
+                <div class="form-element"><input type="text" name="word_definition" class="word_definition" maxlength="85" required></div>
             </div>
 
             <div class="form-set">

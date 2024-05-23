@@ -41,12 +41,12 @@ a:hover {color: cyan; text-decoration: none}
 }
 
 .form-label {
-    width: 40%;
+    width: 35%;
     float: left;
 }
 
 .form-element {
-    width: 60%;
+    width: 65%;
     float: left;
 }
 

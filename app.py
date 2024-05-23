@@ -75,7 +75,12 @@ def credentials(email):
 @app.route('/')
 def render_all():
     ### Get words
-    word_tuple = execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, word_date, word_time, record_id FROM words INNER JOIN types ON words.word_type = types.type_id INNER JOIN records ON words.word_id = records.word_id INNER JOIN images ON words.word_image = images.image_id')
+    word_tuple = execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, word_datetime, record_id FROM words INNER JOIN types ON words.word_type = types.type_id INNER JOIN records ON words.word_id = records.word_id INNER JOIN images ON words.word_image = images.image_id')
+    
+    ### Get displayed words count
+    count_list = []
+    for i in range(len(word_tuple)):
+        count_list.append(i+1)
 
     ### Get users
     username_dict = {}
@@ -85,15 +90,15 @@ def render_all():
         username_dict[user[0]] = user[1]
         active_dict[user[0]] = user[2]
 
-    ### Get displayed words count
-    count_list = []
-    for i in range(len(word_tuple)):
-        count_list.append(i+1)
+    ### Get date and time
+    datetime_dict = {}
+    for word in word_tuple:
+        datetime_dict[word[4]] = [word[6].split()[0], word[6].split()[1]]
 
     ### Get types
     type_tuple = execute(DATABASE, f'SELECT type_id, type_name FROM types')
 
-    return render_template('home.html', words_and_counts = zip(word_tuple, count_list), types = type_tuple, users = username_dict, active = active_dict, logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"))
+    return render_template('home.html', words_and_counts = zip(word_tuple, count_list), types = type_tuple, users = username_dict, active = active_dict, datetime = datetime_dict, logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"))
 
 @app.route('/type=<word_type>')
 def render_word(word_type):
@@ -101,7 +106,7 @@ def render_word(word_type):
     type_id = fetch(DATABASE, f'SELECT type_id FROM types WHERE LOWER(type_name) = "{word_type}"')[0]
 
     ### Get words
-    word_tuple = execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, word_date, word_time, record_id FROM words INNER JOIN types ON words.word_type = types.type_id INNER JOIN records ON words.word_id = records.word_id INNER JOIN images ON words.word_image = images.image_id WHERE words.word_type = {type_id}')
+    word_tuple = execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, word_datetime, record_id FROM words INNER JOIN types ON words.word_type = types.type_id INNER JOIN records ON words.word_id = records.word_id INNER JOIN images ON words.word_image = images.image_id WHERE words.word_type = {type_id}')
 
     ### Get displayed words count
     count_list = []
@@ -115,11 +120,16 @@ def render_word(word_type):
     for user in user_tuple:
         username_dict[user[0]] = user[1]
         active_dict[user[0]] = user[2]
+        
+    ### Get date and time
+    datetime_dict = {}
+    for word in word_tuple:
+        datetime_dict[word[4]] = [word[6].split()[0], word[6].split()[1]]
 
     ### Get types
     type_tuple = execute(DATABASE, f'SELECT type_id, type_name FROM types')
 
-    return render_template('home.html', words_and_counts = zip(word_tuple, count_list), types = type_tuple, users = username_dict, active = active_dict, logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"))
+    return render_template('home.html', words_and_counts = zip(word_tuple, count_list), types = type_tuple, users = username_dict, active = active_dict, datetime = datetime_dict, logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"))
 
 
 ## Search word
@@ -129,7 +139,7 @@ def search():
     query = request.args.get('query') 
 
     ### Get words
-    word_tuple = execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, word_date, word_time, record_id FROM words INNER JOIN types ON words.word_type = types.type_id INNER JOIN records ON words.word_id = records.word_id INNER JOIN images ON words.word_image = images.image_id WHERE LOWER(word_name) = LOWER("{query}") OR LOWER(word_translation) = LOWER("{query}")')
+    word_tuple = execute(DATABASE, f'SELECT word_name, word_translation, type_name, word_definition, user_id, image_name, word_datetime, record_id FROM words INNER JOIN types ON words.word_type = types.type_id INNER JOIN records ON words.word_id = records.word_id INNER JOIN images ON words.word_image = images.image_id WHERE LOWER(word_name) = LOWER("{query}") OR LOWER(word_translation) = LOWER("{query}")')
 
     ### Get displayed words count
     count_list = []
@@ -144,10 +154,15 @@ def search():
         username_dict[user[0]] = user[1]
         active_dict[user[0]] = user[2]
 
+    ### Get date and time
+    datetime_dict = {}
+    for word in word_tuple:
+        datetime_dict[word[4]] = [word[6].split()[0], word[6].split()[1]]
+
     ### Get types
     type_tuple = execute(DATABASE, f'SELECT type_id, type_name FROM types')
 
-    return render_template('home.html', words_and_counts = zip(word_tuple, count_list), types = type_tuple, users = username_dict, active = active_dict, logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"))
+    return render_template('home.html', words_and_counts = zip(word_tuple, count_list), types = type_tuple, users = username_dict, active = active_dict, datetime = datetime_dict, logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"))
 
 
 # Account
@@ -325,18 +340,16 @@ def add_word():
             word_image = request.form.get('word_image').split(", ")[0]
         else:
             word_image = 1
-        word_datetime = execute(DATABASE, f'SELECT datetime(CURRENT_TIMESTAMP, "localtime")')[0][0].split()
-        word_date = word_datetime[0]
-        word_time = word_datetime[1]
+        word_datetime = execute(DATABASE, f'SELECT datetime(CURRENT_TIMESTAMP, "localtime")')[0][0]
 
         ### Add word with corresponding id
         word_id_count = int(fetch(DATABASE, f'SELECT COUNT (*) FROM words')[0]) + 1
-        execute(DATABASE, f'INSERT INTO words (word_id, word_name, word_translation, word_type, word_definition, word_image, word_date, word_time) VALUES ({word_id_count}, "{word_name}", "{word_translation}", {word_type}, "{word_definition}", {word_image}, "{word_date}", "{word_time}")')
+        execute(DATABASE, f'INSERT INTO words (word_id, word_name, word_translation, word_type, word_definition, word_image, word_datetime) VALUES ({word_id_count}, "{word_name}", "{word_translation}", {word_type}, "{word_definition}", {word_image}, "{word_datetime}")')
 
         ### Add record with corresponding id
         record_id_count = int(fetch(DATABASE, f'SELECT COUNT (*) FROM records')[0]) + 1
         execute(DATABASE, f'INSERT INTO records (record_id, word_id, user_id) VALUES ({record_id_count}, {word_id_count}, {session["id"]})')
-
+        
         return redirect("/?message=Word+is+successfully+added!")
     return render_template("admin/add_word.html", logged_in = is_logged_in(), log = logged(), teacher = status("Teacher"))
 

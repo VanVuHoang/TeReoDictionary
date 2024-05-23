@@ -25,13 +25,13 @@ Home
             <p><strong>Type:</strong> {{ word[2] }}</p>
             <p><strong>Definition:</strong> {{ word[3] }}</p>
             <p><strong>User:</strong> {{ users[word[4]] }} ({{ active[word[4]] }})</p>
-            <p><strong>Date (Time):</strong> {{ word[6] }} ({{ word[7] }})</p>
+            <p><strong>Date (Time):</strong> {{ datetime[word[4]][0] }} ({{ datetime[word[4]][1] }})</p>
 
             <!--Delete word-->
             {% if teacher %}
             <center>
                 <button type="submit" value="Delete" class="btn btn-primary" id="delete_word_confirm" onclick=alert({{ count }})>Delete?</button>
-                <form action="/deleting_word/{{ word[8] }}">
+                <form action="/deleting_word/{{ word[7] }}">
                     <button type="submit" value="Delete" class="btn btn-danger" id="delete_word" style="display: none">Delete</button>
                 </form>
             </center>
