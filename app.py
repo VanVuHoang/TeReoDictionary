@@ -325,10 +325,10 @@ def add_word():
             word_image = request.form.get('word_image').split(", ")[0]
         else:
             word_image = 1
-        word_datetime = execute(DATABASE, f'SELECT CURRENT_TIMESTAMP')[0][0].split()
+        word_datetime = execute(DATABASE, f'SELECT datetime(CURRENT_TIMESTAMP, "localtime")')[0][0].split()
         word_date = word_datetime[0]
         word_time = word_datetime[1]
-        
+
         ### Add word with corresponding id
         word_id_count = int(fetch(DATABASE, f'SELECT COUNT (*) FROM words')[0]) + 1
         execute(DATABASE, f'INSERT INTO words (word_id, word_name, word_translation, word_type, word_definition, word_image, word_date, word_time) VALUES ({word_id_count}, "{word_name}", "{word_translation}", {word_type}, "{word_definition}", {word_image}, "{word_date}", "{word_time}")')
