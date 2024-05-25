@@ -218,7 +218,7 @@ def render_login():
         try:
             credentials(email)
         except TypeError:
-            return redirect("/login_account?error=Invalid+username+or+password")
+            return redirect("/login_account?error=Invalid+email+or+password")
         if not bcrypt.check_password_hash(credentials(email)[0], password):
             return redirect(request.referrer + "?error=Email+invalid+or+password+incorrect")
         session['email'] = email
